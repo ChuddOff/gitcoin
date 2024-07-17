@@ -1,0 +1,12 @@
+<svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_4_986" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="62" height="62">
+<path d="M62 0H0V62H62V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_4_986)">
+<path d="M31.1 2L60 30.659L30.899 60L2 31.34L31.1 2Z" stroke="black" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M60 31H31" stroke="black" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M30.077 30.9999C30.077 30.4949 30.49 30.0859 31 30.0859C31.509 30.0859 31.922 30.4949 31.922 30.9999C31.922 31.5049 31.509 31.9139 31 31.9139C30.49 31.9139 30.077 31.5049 30.077 30.9999Z" fill="white" stroke="black" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M22.134 23.3669L18.024 27.0529L14.244 30.8159L19.126 35.6469L22.143 38.6329" stroke="black" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M30.077 30.582C30.077 22.207 36.776 15.417 45.039 15.417C53.301 15.417 60 22.207 60 30.582C60 38.956 53.301 45.746 45.039 45.746C36.776 45.746 30.077 38.956 30.077 30.582Z" stroke="black" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+</g>
+</svg>
