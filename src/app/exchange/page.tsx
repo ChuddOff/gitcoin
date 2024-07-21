@@ -17,6 +17,9 @@ import {
   Tab,
   Tabs,
 } from "@nextui-org/react";
+import SwitchText from "@/components/switchText/SwitchText";
+import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 interface OHLCData {
   OHLC: any[][];
@@ -37,6 +40,10 @@ async function getData(type: string) {
 }
 
 export default function Home() {
+  const searchParams = useSearchParams();
+
+  const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
+
   const [data, setData] = useState<OHLCData>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [price, setPrice] = useState<string>();
@@ -87,7 +94,7 @@ export default function Home() {
     detailsscript.async = true;
     detailsscript.innerHTML = `
         {
-          "symbol": "BITSTAMP:BTCUSD",
+          "symbol": "${tvwidgetsymbol || "BITSTAMP:BTCUSD"}",
           "width": 1205,
           "locale": "ru",
           "colorTheme": "dark",
@@ -106,7 +113,7 @@ export default function Home() {
     chartscript.innerHTML = `
         {
           "autosize": true,
-          "symbol": "BITSTAMP:BTCUSD",
+          "symbol": "${tvwidgetsymbol || "BITSTAMP:BTCUSD"}",
           "interval": "S",
           "timezone": "Etc/UTC",
           "theme": "light",
@@ -120,21 +127,21 @@ export default function Home() {
     if (chart.current!.children.length === 1) {
       chart.current!.appendChild(chartscript);
     }
-  }, []);
+  }, [chart, details, widgetContainerRef]);
+
+  console.log(data);
 
   useEffect(() => {
     fetchData(); // Первоначальный запрос данных
 
-    const intervalId = setInterval(fetchData, 10000); // Обновление данных каждые 5 секунд
+    // const intervalId = setInterval(fetchData, 10000); // Обновление данных каждые 5 секунд
 
-    return () => clearInterval(intervalId); // Очистка интервала при размонтировании компонента
+    // return () => clearInterval(intervalId); // Очистка интервала при размонтировании компонента
   }, []);
 
   return (
-    <main className="flex flex-col items-center w-full bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
-      <div className="flex w-[1890px] h-[58px] rounded-[5px] mt-[5px] mb-[5px] px-[22px] items-center bg-[#F0DDF3]">
-        <Image src="/bell.svg" alt="bell" width={45} height={45} />
-      </div>
+    <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
+      <SwitchText />
       <div className=" flex gap-[8px]">
         <div className="w-[350px] bg-white rounded-[5px] overflow-hidden">
           <div
@@ -165,7 +172,7 @@ export default function Home() {
               ></div>
             </div>
           </div>
-          <div className="h-[150px] bg-[#101014] rounded-[5px]">
+          <div className="h-[190px] bg-[#101014] rounded-[5px]">
             <div className="flex w-full flex-col h-full">
               <Tabs
                 aria-label="Options"
