@@ -10,10 +10,11 @@ const Footer = () => {
 
   return (
     <>
-      {!pathName.toString().includes("/upload") && (
+      {!pathName.toString().includes("/exchange") && (
         <footer className="h-[329px] w-[100%] pt-[41px] flex gap-[16px] bg-[white] top-[0px] text-black">
-          <div className="h-full">
-            <nav className="flex flex-row items-center gap-[16px] w-[262px] text-black ml-[32px]">
+          <div className="h-full flex flex-col gap-[28px] ml-[32px]">
+            <h3 className="font-[600] text-[16px]">GitCoin</h3>
+            <nav className="flex flex-row items-center gap-[16px] w-[262px] text-black">
               <ul>
                 <Link
                   href="https://www.youtube.com/@chudd_off"
@@ -28,22 +29,6 @@ const Footer = () => {
                   className="text-white"
                 >
                   <Image src="/inst.svg" alt="logo" width={24} height={24} />
-                </Link>
-              </ul>
-              <ul>
-                <Link
-                  href="https://www.youtube.com/@chudd_off"
-                  className="text-white"
-                >
-                  <Image src="/youtube.svg" alt="logo" width={24} height={24} />
-                </Link>
-              </ul>
-              <ul>
-                <Link
-                  href="https://www.youtube.com/@chudd_off"
-                  className="text-white"
-                >
-                  <Image src="/in.svg" alt="logo" width={24} height={24} />
                 </Link>
               </ul>
             </nav>

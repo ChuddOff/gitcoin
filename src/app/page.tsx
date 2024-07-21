@@ -1,13 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 export default function Home() {
@@ -22,38 +14,26 @@ export default function Home() {
         </h1>
 
         <div className="mt-[32px]">
-          <SignedOut>
-            <div className={"flex gap-[16px]"}>
-              <SignUpButton>
-                <div
-                  className={
-                    "w-[87px] h-[40px] rounded-[8px] bg-white flex items-center justify-center cursor-pointer"
-                  }
-                >
-                  <h3 className="font-[700] text-[16px] text-black">
-                    Register
-                  </h3>
-                </div>
-              </SignUpButton>
-              <SignInButton>
-                <div
-                  className={
-                    "w-[87px] h-[40px] rounded-[8px] bg-black flex items-center justify-center cursor-pointer"
-                  }
-                >
-                  <h3 className="font-[700] text-[16px] text-white">Log in</h3>
-                </div>
-              </SignInButton>
-            </div>
-          </SignedOut>
-          {/* <SignedIn>
-            <div className={"flex gap-3"}>
-              <UserButton />
-              <Link className={"text-violet uppercase"} href="/profile">
-                {user?.username}
-              </Link>
-            </div>
-          </SignedIn> */}
+          <div className={"flex gap-[16px]"}>
+            <SignUpButton>
+              <div
+                className={
+                  "w-[87px] h-[40px] rounded-[8px] bg-white flex items-center justify-center cursor-pointer"
+                }
+              >
+                <h3 className="font-[700] text-[16px] text-black">Register</h3>
+              </div>
+            </SignUpButton>
+            <SignInButton>
+              <div
+                className={
+                  "w-[87px] h-[40px] rounded-[8px] bg-black flex items-center justify-center cursor-pointer"
+                }
+              >
+                <h3 className="font-[700] text-[16px] text-white">Log in</h3>
+              </div>
+            </SignInButton>
+          </div>
         </div>
       </div>
     </main>

@@ -3,9 +3,9 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { ClerkProvider } from "@clerk/nextjs";
-import Header from "./components/header/Header";
-import Footer from "./components/footer/Footer";
 import { NextUIProvider } from "@nextui-org/react";
+import Header from "@/components/header/Header";
+import Footer from "@/components/footer/Footer";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 

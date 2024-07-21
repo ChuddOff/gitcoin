@@ -24,7 +24,7 @@ const Header = () => {
   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       console.log(2323);
-      router.push(`/code/${input}`);
+      router.push(`/exchange/${input}`);
     }
   };
 
@@ -45,6 +45,28 @@ const Header = () => {
       </NavbarContent>
 
       <NavbarContent justify="end">
+        <NavbarItem>
+          <Link className={"text-violet uppercase"} href="/exchange">
+            <Image
+              src="/exchange.svg"
+              alt="exchange"
+              width={32}
+              height={32}
+              className="cursor-pointer h-[32px]"
+            />
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link className={"text-violet uppercase"} href="/wallet">
+            <Image
+              src="/wallet.svg"
+              alt="wallet"
+              width={32}
+              height={32}
+              className="cursor-pointer h-[32px]"
+            />
+          </Link>
+        </NavbarItem>
         <NavbarItem>
           <SignedOut>
             <SignInButton>
