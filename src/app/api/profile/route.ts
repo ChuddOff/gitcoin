@@ -40,11 +40,11 @@ export async function PUT(req: NextRequest) {
 
     profile.deposit -= bodyObject.cost;
 
-    if (profile.pocket[bodyObject.coin]) {
-      profile.pocket[bodyObject.coin] += bodyObject.amount;
-    } else {
-      profile.pocket[bodyObject.coin] = bodyObject.amount;
-    }
+    // if (profile.pocket[bodyObject.coin]) {
+    //   profile.pocket[bodyObject.coin] += bodyObject.amount;
+    // } else {
+    //   profile.pocket[bodyObject.coin] = bodyObject.amount;
+    // }
 
     await profile.save();
 
@@ -104,26 +104,26 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  await clientPromise;
+// export async function DELETE(req: NextRequest) {
+//   await clientPromise;
 
-  try {
-    const url = new URL(req.url || "");
-    const params = new URLSearchParams(url.searchParams);
+//   try {
+//     const url = new URL(req.url || "");
+//     const params = new URLSearchParams(url.searchParams);
 
-    const _id = params.get("_id");
-    const author = params.get("author");
+//     const _id = params.get("_id");
+//     const author = params.get("author");
 
-    const Code = await code.findOne({ _id: _id }).exec();
+//     const Code = await code.findOne({ _id: _id }).exec();
 
-    if (Code!.author !== author) {
-      return NextResponse.json({ status: 403 });
-    }
+//     if (Code!.author !== author) {
+//       return NextResponse.json({ status: 403 });
+//     }
 
-    await code.deleteOne({ _id: _id });
+//     await code.deleteOne({ _id: _id });
 
-    return NextResponse.json({ status: 200 });
-  } catch (error) {
-    return NextResponse.json({ status: 400, error: error });
-  }
-}
+//     return NextResponse.json({ status: 200 });
+//   } catch (error) {
+//     return NextResponse.json({ status: 400, error: error });
+//   }
+// }
