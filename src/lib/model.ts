@@ -1,13 +1,11 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface ICode extends Document {
-  name: string;
-  description: string;
-  show: boolean;
-  author: string;
-  html: string;
-  css: string;
-  js: string;
+  _id: string;
+  nick: string;
+  deposit: number;
+  bonus: boolean;
+  pocket: object;
 }
 
 const SchemaCode: Schema = new mongoose.Schema({
@@ -31,13 +29,20 @@ const SchemaCode: Schema = new mongoose.Schema({
     required: true,
     unique: false,
   },
+  pocket: {
+    type: Object,
+    required: true,
+    unique: false,
+  },
 });
 
 let code: Model<ICode>;
-if (mongoose.models.codes) {
-  code = mongoose.model("profile") as Model<ICode>; // Получаем существующую модель
+if (mongoose.models.profiles) {
+  code = mongoose.model("profiles") as Model<ICode>; // Получаем существующую модель
 } else {
-  code = mongoose.model<ICode>("profile", SchemaCode); // Создаем новую модель, если ее нет
+  console.log(12122);
+
+  code = mongoose.model<ICode>("profiles", SchemaCode); // Создаем новую модель, если ее нет
 }
 
 export default code;

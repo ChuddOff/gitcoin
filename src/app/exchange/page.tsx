@@ -2,7 +2,7 @@
 
 import "./page.css";
 import Image from "next/image";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts, { chart } from "highcharts/highstock";
@@ -14,23 +14,52 @@ import {
   Card,
   CardBody,
   Input,
+  Skeleton,
+  Spinner,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
   Tabs,
 } from "@nextui-org/react";
 import SwitchText from "@/components/switchText/SwitchText";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
 
+interface profileData {
+  _id: string;
+  nick: string;
+  deposit: number;
+  bonus: boolean;
+}
 interface OHLCData {
-  OHLC: any[][];
-  order: any;
-  prise: number;
-  status: number;
+  bids: number[][];
+  asks: number[][];
 }
 
 async function getData(type: string) {
-  const url = process.env.URL;
   let response = await fetch("/api/getData?type=" + type, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.json();
+}
+async function getProfileData(id: string) {
+  let response = await fetch("/api/profile?_id=" + id, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.json();
+}
+async function getCost(type: string) {
+  let response = await fetch("/api/getCost?type=" + type, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -41,18 +70,53 @@ async function getData(type: string) {
 
 export default function Home() {
   const searchParams = useSearchParams();
-
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
+  const { user } = useUser();
+
+  const [profileCost, setProfileCost] = useState<number>();
+  const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
+
+  const [profileData, setProfileData] = useState<profileData>();
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
 
   const [data, setData] = useState<OHLCData>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [price, setPrice] = useState<string>();
   const [fill, setFill] = useState<string>();
 
+  async function fetchProfileData() {
+    setIsLoadingProfile(true);
+    try {
+      const newData = await getProfileData(user?.id || "");
+      setProfileData(newData.profile);
+      setIsLoadingProfile(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoadingProfile(false);
+    }
+  }
+  async function fetchCostData() {
+    setIsLoadingCost(true);
+    try {
+      const newData = await getCost(
+        (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+          "/USDT"
+      );
+      setPrice(newData.prise);
+      setIsLoadingCost(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoadingCost(false);
+    }
+  }
+
   async function fetchData() {
     try {
-      const newData = await getData("BTC/USDT");
-      setData(newData ?? data);
+      const newData = await getData(
+        (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+          "/USDT"
+      );
+      setData(newData.order ?? data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -129,15 +193,20 @@ export default function Home() {
     }
   }, [chart, details, widgetContainerRef]);
 
-  console.log(data);
-
   useEffect(() => {
     fetchData(); // Первоначальный запрос данных
 
-    // const intervalId = setInterval(fetchData, 10000); // Обновление данных каждые 5 секунд
+    const interval = setInterval(() => {
+      fetchData();
+    }, 10000);
 
-    // return () => clearInterval(intervalId); // Очистка интервала при размонтировании компонента
+    return () => clearInterval(interval);
   }, []);
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfileData();
+    }
+  }, [user?.id]);
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -227,13 +296,19 @@ export default function Home() {
           </div>
         </div>
         <div className="pb-[13px] rounded-[5px] w-[340px] h-full bg-gradient-to-b from-[#93A1F8] to-[#42D2C9] flex flex-col items-center">
-          <div className="w-[323px] h-[47px] border-[1px] mt-[34px] p-[11px] flex items-center justify-between">
+          <div className="w-[323px] h-[47px] border-[1px] mt-[17px] p-[11px] flex items-center justify-between">
             <h3 className="font-[800] text-[13px] text-black">
               Доступ Баланс:
             </h3>
-            <h3 className="font-[800] text-[13px] text-black">10030,30 USDT</h3>
+            {profileData ? (
+              <h3 className="font-[800] text-[13px] text-black">
+                {profileData.deposit}
+              </h3>
+            ) : (
+              <Skeleton className="h-3 w-[70px] rounded-lg" />
+            )}
           </div>
-          <div className="mt-[32px] flex items-center gap-[30px]">
+          <div className="mt-[17px] flex items-center gap-[30px]">
             <Button
               color="success"
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
@@ -249,7 +324,7 @@ export default function Home() {
           </div>
           <Input
             classNames={{
-              base: "max-w-full max-w-[300px] w-full h-[40px] mt-[32px]",
+              base: "max-w-full max-w-[300px] w-full h-[40px] mt-[17px]",
               mainWrapper: "h-full ",
               input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
               innerWrapper: "flex",
@@ -257,10 +332,14 @@ export default function Home() {
                 "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
             }}
             endContent={
-              <div className="h-full flex items-center justify-center w-[76px]">
-                <h3 className="text-[#45979f] font-[800] text-[12px]">
+              <div className="h-full flex items-center justify-center w-[110px] ">
+                <Button
+                  onClick={fetchCostData}
+                  isLoading={isLoadingCost}
+                  className="text-[#45979f] font-[800] text-[12px] bg-transparent"
+                >
                   Последняя
-                </h3>
+                </Button>
               </div>
             }
             label="Цена Ордера"
@@ -276,7 +355,7 @@ export default function Home() {
           />
           <Input
             classNames={{
-              base: "max-w-full max-w-[300px] w-full h-[40px] mt-[36px] ",
+              base: "max-w-full max-w-[300px] w-full h-[40px] mt-[17px] ",
               mainWrapper: "h-full ",
               input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
               innerWrapper: "flex",
@@ -284,8 +363,10 @@ export default function Home() {
                 "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
             }}
             endContent={
-              <div className="h-full flex items-center w-[76px]">
-                <h3 className="text-[#45979f] font-[800] text-[12px]">USDT</h3>
+              <div className="h-full flex items-center justify-center w-[110px]">
+                <h3 className="text-[#45979f] font-[800] text-[12px] w-[120px] text-center">
+                  USDT
+                </h3>
               </div>
             }
             label="Заполнить по стоимости"
@@ -302,12 +383,22 @@ export default function Home() {
           <div className="mt-[15px] flex items-center gap-[1px]">
             <ButtonGroup>
               <Button
+                onClick={() =>
+                  setFill(
+                    Math.floor((profileData?.deposit ?? 0) / 10).toString()
+                  )
+                }
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
               >
                 10%
               </Button>
               <Button
+                onClick={() =>
+                  setFill(
+                    Math.floor((profileData?.deposit ?? 0) / 4).toString()
+                  )
+                }
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -315,6 +406,11 @@ export default function Home() {
                 25%
               </Button>
               <Button
+                onClick={() =>
+                  setFill(
+                    Math.floor((profileData?.deposit ?? 0) / 2).toString()
+                  )
+                }
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -322,6 +418,11 @@ export default function Home() {
                 50%
               </Button>
               <Button
+                onClick={() =>
+                  setFill(
+                    Math.floor((profileData?.deposit ?? 0) * 0.75).toString()
+                  )
+                }
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -329,6 +430,9 @@ export default function Home() {
                 75%
               </Button>
               <Button
+                onClick={() =>
+                  setFill(Math.floor(profileData?.deposit ?? 0).toString())
+                }
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-l-[1px] border-black"
@@ -337,33 +441,166 @@ export default function Home() {
               </Button>
             </ButtonGroup>
           </div>
-          <div className="h-full bg-[#ffffff] rounded-[5px] mt-[11px] w-[300px]">
+          <div className="h-full bg-[#ffffff] rounded-[5px] mt-[11px] w-[320px] h-full p-[0px]">
             <div className="flex w-full flex-col h-full">
               <Tabs
                 aria-label="Options"
                 variant="underlined"
                 color="warning"
                 classNames={{
-                  tabList: "gap-3 w-full relative rounded-none p-[12px]",
-                  cursor: "w-full",
-                  tab: " px-0",
+                  panel: "bg-white",
+                  tabList:
+                    "gap-3 w-full relative rounded-none p-[5px] px-[7px]",
+                  cursor: "w-full ",
+                  tab: " px-0 w-[120px]",
                   tabContent:
-                    "text-[#b4b6b9] font-[700] group-data-[selected=true]:text-black",
+                    "text-[#b4b6b9] font-[700] group-data-[selected=true]:text-black text-[13px]",
                 }}
               >
-                <Tab key="photos" title="Книга ордеров" className=" h-full p-0">
-                  <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
-                    <CardBody className="p-[0px] h-full] bg-[#f9f9f9] border-[0px] p-[10px]">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
-                    </CardBody>
-                  </Card>
-                </Tab>
-                <Tab key="music" title="Недавние торги" className=" h-full p-0">
-                  <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
-                    <CardBody className="p-[0px] h-full bg-[#f9f9f9] border-[0px] p-[10px]">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                <Tab
+                  key="photos"
+                  title="Книга ордеров"
+                  className=" h-full p-0 bg-white"
+                >
+                  <Card className="rounded-[0px] p-[0px] h-full rounded-[5px] bg-white">
+                    <CardBody className="p-[0px] h-full bg-white border-[0px] p-[0px]">
+                      <Table
+                        aria-label="Example static collection table"
+                        radius="sm"
+                        layout="fixed"
+                        classNames={{
+                          th: "w-full pt-[5px] px-[10px] m-[0px] h-[10px] bg-white text-[#81858c] font-[700]",
+                          base: "w-full p-[0px] m-[0px] h-[195px]",
+                          table: "w-full p-[0px] m-[0px] h-[5px]",
+                          tbody: "w-full p-[0px] m-[0px] h-[5px]",
+                          emptyWrapper: "w-full p-[0px] m-[0px] h-[5px]",
+                          wrapper: "w-full p-[0px] m-[0px] h-full",
+                          td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#ef484d] font-[500] text-[12px]",
+                        }}
+                      >
+                        <TableHeader>
+                          <TableColumn>Цена(USDT)</TableColumn>
+                          <TableColumn>
+                            Кол-во(
+                            {tvwidgetsymbol?.slice(
+                              tvwidgetsymbol?.indexOf(":") + 1,
+                              -3
+                            ) ?? "BTC"}
+                            )
+                          </TableColumn>
+                          <TableColumn>
+                            Всего(
+                            {tvwidgetsymbol?.slice(
+                              tvwidgetsymbol?.indexOf(":") + 1,
+                              -3
+                            ) ?? "BTC"}
+                            )
+                          </TableColumn>
+                        </TableHeader>
+                        <TableBody
+                          items={data?.bids.slice(0, 8) || []}
+                          isLoading={isLoading}
+                          loadingContent={<Spinner label="Loading..." />}
+                        >
+                          {(item) => (
+                            <TableRow key={data?.bids.indexOf(item)}>
+                              <TableCell>{item[0]}</TableCell>
+                              <TableCell>{item[1]}</TableCell>
+                              <TableCell>
+                                {data?.bids
+                                  .slice(data?.bids.indexOf(item) ?? 0, 8)
+                                  .map((item) => item[1])
+                                  .reduce((a, b) => {
+                                    return a + b;
+                                  }, 0)
+                                  ?.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                      <div>
+                        <h3 className="text-[#ef454a] font-[700] text-[15px] px-[10px] py-[4px]">
+                          {data ? data?.asks[0][0] : ""}
+                        </h3>
+                      </div>
+                      <Table
+                        hideHeader
+                        aria-label="Example static collection table"
+                        radius="sm"
+                        layout="fixed"
+                        classNames={{
+                          th: "w-full py-[5px] px-[10px] m-[0px] h-[10px] bg-white",
+                          base: "w-full p-[0px] m-[0px] h-[165px] ",
+                          table: "w-full p-[0px] m-[0px] h-[5px] ",
+                          tbody: "w-full p-[0px] m-[0px] h-[5px]",
+                          emptyWrapper: "w-full p-[0px] m-[0px] h-[5px]",
+                          wrapper: "w-full p-[0px] m-[0px] h-full bg-white",
+                          td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#45be84] font-[500] text-[12px]",
+                        }}
+                      >
+                        <TableHeader>
+                          <TableColumn>Цена(USDT)</TableColumn>
+                          <TableColumn>{`Кол-во(${tvwidgetsymbol?.slice(
+                            tvwidgetsymbol?.indexOf(":") + 1,
+                            -3
+                          )})`}</TableColumn>
+                          <TableColumn>Всего(BTC)</TableColumn>
+                        </TableHeader>
+                        <TableBody
+                          items={data?.asks.slice(0, 8) || []}
+                          loadingContent={<Spinner label="Loading..." />}
+                        >
+                          {(item) => (
+                            <TableRow key={data?.asks.indexOf(item)}>
+                              <TableCell>{item[0]}</TableCell>
+                              <TableCell>{item[1]}</TableCell>
+                              <TableCell>
+                                {data?.asks
+                                  .slice(0, data?.asks.indexOf(item) + 1 ?? 8)
+                                  .map((item) => item[1])
+                                  .reduce((a, b) => {
+                                    return a + b;
+                                  }, 0)
+                                  ?.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                      <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-[1s] transition-all">
+                        <div
+                          className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all"
+                          style={{
+                            width: `${
+                              data
+                                ? (data?.asks
+                                    .slice(0, 8)
+                                    .map((item) => item[1])
+                                    .reduce((a, b) => {
+                                      return a + b;
+                                    }, 0) /
+                                    data?.bids
+                                      .slice(0, 8)
+                                      .map((item) => item[1])
+                                      .reduce((a, b) => {
+                                        return a + b;
+                                      }, 0)) *
+                                  100
+                                : 50
+                            }%`,
+                          }}
+                        >
+                          <div className="transition-[1s] transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
+                            B
+                          </div>
+                        </div>
+                        <div className="rounded-[5px] flex w-full bg-[#ffeaea] justify-end w-min-[29px]">
+                          <div className="rounded-[5px] border-[2px] border-[#ef464b] flex w-[29px] justify-center items-center text-[#ef484d] w-min-[29px]">
+                            S
+                          </div>
+                        </div>
+                      </div>
                     </CardBody>
                   </Card>
                 </Tab>

@@ -10,11 +10,11 @@ export async function GET(req: NextRequest) {
 
     const type = params.get("type");
 
-    const orderBook = await exchange.fetchOrderBook(type as string);
+    const ticker = await exchange.fetchTicker(type as string);
 
     return NextResponse.json({
       status: 200,
-      order: orderBook,
+      prise: ticker.last,
     });
   } catch (error) {
     return NextResponse.json({ status: 400, error: error });

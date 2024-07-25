@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Input,
   Link,
@@ -11,13 +11,21 @@ import {
 } from "@nextui-org/react";
 import Search from "../search/Search";
 import Image from "next/image";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+  UserButton,
+  useSignUp,
+} from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import { redirect, useRouter } from "next/navigation";
 
 const Header = () => {
   const { user } = useUser();
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
 
   const [input, setInput] = useState<string>("");
 
@@ -27,6 +35,24 @@ const Header = () => {
       router.push(`/exchange/${input}`);
     }
   };
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          _id: user?.id || "",
+          nick: user?.username || "",
+          deposit: 10000,
+          bonus: true,
+          pocket: [],
+        }),
+      });
+    }
+  }, [isSignedIn]);
 
   return (
     <Navbar isBordered={true} className="select-none bg-white">
