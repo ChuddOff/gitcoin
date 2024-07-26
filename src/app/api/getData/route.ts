@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   console.log(1);
 
-  const exchange = new ccxt.binance();
+  const exchange = new ccxt.bitfinex();
 
   try {
     console.log(exchange.id);
