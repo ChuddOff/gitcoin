@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const exchange = new ccxt.binance();
 
   try {
-    console.log(exchange);
+    console.log(exchange.id);
     const url = new URL(req.url || "");
     const params = new URLSearchParams(url.searchParams);
     console.log(url);
