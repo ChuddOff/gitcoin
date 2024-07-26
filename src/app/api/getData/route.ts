@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
     console.log(2);
     const url = new URL(req.url || "");
     const params = new URLSearchParams(url.searchParams);
-    console.log(3);
+    console.log(url);
     const type = params.get("type");
-    console.log(4);
+    console.log(type);
     const orderBook = await exchange.fetchOrderBook(type as string);
     console.log(5);
     return NextResponse.json({
