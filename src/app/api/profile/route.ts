@@ -97,6 +97,8 @@ export async function GET(req: NextRequest) {
         pocket: [],
       });
 
+      await newProfile.save();
+
       return NextResponse.json({ status: 200, profile: newProfile });
     }
 
