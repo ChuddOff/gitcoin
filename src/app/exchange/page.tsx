@@ -49,8 +49,8 @@ async function getData(type: string) {
 
   return response.json();
 }
-async function getProfileData(id: string) {
-  let response = await fetch("/api/profile?_id=" + id, {
+async function getProfileData() {
+  let response = await fetch("/api/profile", {
     headers: {
       "Content-Type": "application/json",
     },
@@ -87,7 +87,7 @@ export default function Home() {
   async function fetchProfileData() {
     setIsLoadingProfile(true);
     try {
-      const newData = await getProfileData(user?.id || "");
+      const newData = await getProfileData();
       setProfileData(newData.profile);
       setIsLoadingProfile(false);
     } catch (error) {
