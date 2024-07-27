@@ -36,23 +36,23 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetch("/api/profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          _id: user?.id || "",
-          nick: user?.username || "",
-          deposit: 10000,
-          bonus: true,
-          pocket: [],
-        }),
-      });
-    }
-  }, [isSignedIn]);
+  // useEffect(() => {
+  //   if (isSignedIn) {
+  //     fetch("/api/profile", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         _id: user?.id || "",
+  //         nick: user?.username || "",
+  //         deposit: 10000,
+  //         bonus: true,
+  //         pocket: [],
+  //       }),
+  //     });
+  //   }
+  // }, [isSignedIn]);
 
   return (
     <Navbar isBordered={true} className="select-none bg-white">

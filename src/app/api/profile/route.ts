@@ -1,7 +1,7 @@
 import clientPromise from "@/lib/mongoConnect";
 import code, { ICode } from "@/lib/model";
-import { Db, ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from "@clerk/backend";
 
 interface IPocket {
   [key: string]: number;
@@ -27,75 +27,77 @@ interface IbodyGet {
   author: string;
 }
 
-export async function PUT(req: NextRequest) {
-  await clientPromise;
+// export async function PUT(req: NextRequest) {
+//   await clientPromise;
 
-  try {
-    const bodyObject = (await req.json()) as IbodyPut;
-    const profile = await code.findOne({ _id: bodyObject._id }).exec();
+//   try {
+//     const bodyObject = (await req.json()) as IbodyPut;
+//     const profile = await code.findOne({ _id: bodyObject._id }).exec();
 
-    if (!profile) {
-      return NextResponse.json({ status: 403 });
-    }
+//     if (!profile) {
+//       return NextResponse.json({ status: 403 });
+//     }
 
-    profile.deposit -= bodyObject.cost;
+//     profile.deposit -= bodyObject.cost;
 
-    // if (profile.pocket[bodyObject.coin]) {
-    //   profile.pocket[bodyObject.coin] += bodyObject.amount;
-    // } else {
-    //   profile.pocket[bodyObject.coin] = bodyObject.amount;
-    // }
+//     // if (profile.pocket[bodyObject.coin]) {
+//     //   profile.pocket[bodyObject.coin] += bodyObject.amount;
+//     // } else {
+//     //   profile.pocket[bodyObject.coin] = bodyObject.amount;
+//     // }
 
-    await profile.save();
+//     await profile.save();
 
-    return NextResponse.json({ status: 200 });
-  } catch (error) {
-    return NextResponse.json({ status: 400, error: error });
-  }
-}
+//     return NextResponse.json({ status: 200 });
+//   } catch (error) {
+//     return NextResponse.json({ status: 400, error: error });
+//   }
+// }
 
-export async function POST(req: NextRequest) {
-  console.log(23233);
+// export async function POST(req: NextRequest) {
+//   await clientPromise;
 
-  await clientPromise;
+//   try {
+//     const bodyObject = (await req.json()) as IbodyPost;
+//     // _id, nick, deposit, bonus
 
-  try {
-    const bodyObject = (await req.json()) as IbodyPost;
-    // _id, nick, deposit, bonus
+//     const allReadyDone = await code.findOne({ _id: bodyObject._id }).exec();
 
-    console.log(bodyObject);
+//     if (!allReadyDone) {
+//       return NextResponse.json({ status: 403 });
+//     }
 
-    const allReadyDone = await code.findOne({ _id: bodyObject._id }).exec();
+//     const newCode = await code.create(bodyObject);
 
-    console.log(allReadyDone);
+//     await newCode.save();
 
-    if (!allReadyDone) {
-      return NextResponse.json({ status: 403 });
-    }
-
-    const newCode = await code.create(bodyObject);
-
-    await newCode.save();
-
-    return NextResponse.json({ status: 200 });
-  } catch (error) {
-    return NextResponse.json({ status: 400, error: error });
-  }
-}
+//     return NextResponse.json({ status: 200 });
+//   } catch (error) {
+//     return NextResponse.json({ status: 400, error: error });
+//   }
+// }
 
 export async function GET(req: NextRequest) {
   await clientPromise;
 
+  const token = req.cookies.get("__session_Vzza_nc9");
+
+  const { sub: user_id } = await verifyToken(token?.value ?? "", {
+    jwtKey: process.env.CLERK_JWT_KEY,
+  });
+
   try {
-    const url = new URL(req.url || "");
-    const params = new URLSearchParams(url.searchParams);
-
-    const _id = params.get("_id");
-
-    const newCode = await code.findOne({ _id: _id }).exec();
+    const newCode = await code.findOne({ _id: user_id }).exec();
 
     if (!newCode) {
-      return NextResponse.json({ status: 400 });
+      const newProfile = await code.create({
+        _id: user_id,
+        deposit: 10000,
+        bonus: true,
+        pocket: [],
+      });
+
+      return NextResponse.json({ status: 200, profile: newProfile });
     }
 
     return NextResponse.json({ status: 200, profile: newCode });
@@ -103,27 +105,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ status: 400, error: error });
   }
 }
-
-// export async function DELETE(req: NextRequest) {
-//   await clientPromise;
-
-//   try {
-//     const url = new URL(req.url || "");
-//     const params = new URLSearchParams(url.searchParams);
-
-//     const _id = params.get("_id");
-//     const author = params.get("author");
-
-//     const Code = await code.findOne({ _id: _id }).exec();
-
-//     if (Code!.author !== author) {
-//       return NextResponse.json({ status: 403 });
-//     }
-
-//     await code.deleteOne({ _id: _id });
-
-//     return NextResponse.json({ status: 200 });
-//   } catch (error) {
-//     return NextResponse.json({ status: 400, error: error });
-//   }
-// }
