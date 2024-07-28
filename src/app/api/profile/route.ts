@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
   await clientPromise;
 
   try {
-    const token = req.cookies.get("__session_Vzza_nc9");
+    const token = req.cookies.get("__session");
 
     console.log(token);
 
