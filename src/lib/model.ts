@@ -14,11 +14,6 @@ const SchemaCode: Schema = new mongoose.Schema({
     required: true,
     unique: false,
   },
-  nick: {
-    type: String,
-    required: true,
-    unique: false,
-  },
   deposit: {
     type: Number,
     required: true,
