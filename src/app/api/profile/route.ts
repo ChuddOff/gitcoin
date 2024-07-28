@@ -83,6 +83,8 @@ export async function GET(req: NextRequest) {
   try {
     const token = req.cookies.get("__session_Vzza_nc9");
 
+    console.log(token);
+
     const { sub: user_id } = await verifyToken(token?.value ?? "", {
       jwtKey: process.env.CLERK_JWT_KEY,
     });
