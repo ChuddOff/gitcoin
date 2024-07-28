@@ -78,5 +78,32 @@ interface IbodyGet {
 // }
 
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ status: 200 });
+  await clientPromise;
+
+  try {
+    const token = req.cookies.get("__session_Vzza_nc9");
+
+    const { sub: user_id } = await verifyToken(token?.value ?? "", {
+      jwtKey: process.env.CLERK_JWT_KEY,
+    });
+
+    const newCode = await code.findOne({ _id: user_id }).exec();
+
+    if (!newCode) {
+      const newProfile = await code.create({
+        _id: user_id,
+        deposit: 10000,
+        bonus: true,
+        pocket: [],
+      });
+
+      await newProfile.save();
+
+      return NextResponse.json({ status: 200, profile: newProfile });
+    }
+
+    return NextResponse.json({ status: 200, profile: newCode });
+  } catch (error) {
+    return NextResponse.json({ status: 400, error: error });
+  }
 }
