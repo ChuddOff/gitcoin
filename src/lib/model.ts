@@ -1,11 +1,17 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
+interface orderInfo {
+  cost: number;
+  coin: string;
+  amount: number;
+}
 export interface ICode extends Document {
   _id: string;
   nick: string;
   deposit: number;
   bonus: boolean;
-  pocket: object;
+  pocket: Map<string, number>;
+  orders: orderInfo[];
 }
 
 const SchemaCode: Schema = new mongoose.Schema({
@@ -25,7 +31,13 @@ const SchemaCode: Schema = new mongoose.Schema({
     unique: false,
   },
   pocket: {
-    type: Object,
+    type: Map,
+    of: Number,
+    required: true,
+    unique: false,
+  },
+  orders: {
+    type: Array,
     required: true,
     unique: false,
   },
@@ -35,8 +47,6 @@ let code: Model<ICode>;
 if (mongoose.models.profiles) {
   code = mongoose.model("profiles") as Model<ICode>; // Получаем существующую модель
 } else {
-  console.log(12122);
-
   code = mongoose.model<ICode>("profiles", SchemaCode); // Создаем новую модель, если ее нет
 }
 
