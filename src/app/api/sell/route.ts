@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest) {
     } else {
       profile.pocket.set(bodyObject.coin, bodyObject.amount);
     }
-
+    console.log(profile.pocket);
     await profile.save();
     return NextResponse.json({ status: 200 });
   } catch (error) {

@@ -32,6 +32,7 @@ import List from "@/components/list/List";
 import Chart from "@/components/chart/Chart";
 import Details from "@/components/details/Details";
 import Orders from "@/components/orders/Orders";
+import toast from "react-hot-toast";
 
 interface profileData {
   _id: string;
@@ -59,19 +60,24 @@ async function getCost(type: string) {
   return response.json();
 }
 async function putProfileData(cost: number, coin: string, amount: number) {
-  let response = await fetch("/api/profile", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      cost: cost,
-      coin: coin,
-      amount: amount,
+  toast.promise(
+    fetch("/api/buy", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cost: cost,
+        coin: coin,
+        amount: amount,
+      }),
     }),
-  });
-
-  return response.json();
+    {
+      loading: "Saving...",
+      success: <b>Settings saved!</b>,
+      error: <b>Could not save.</b>,
+    }
+  );
 }
 
 export default function Home() {
@@ -99,6 +105,7 @@ export default function Home() {
       setIsLoadingProfile(false);
     }
   }
+
   async function fetchCostData() {
     setIsLoadingCost(true);
     try {

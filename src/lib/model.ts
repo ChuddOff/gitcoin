@@ -11,7 +11,7 @@ export interface ICode extends Document {
   deposit: number;
   bonus: boolean;
   pocket: Map<string, number>;
-  orders: orderInfo[];
+  // orders: orderInfo[];
 }
 
 const SchemaCode: Schema = new mongoose.Schema({
@@ -36,11 +36,11 @@ const SchemaCode: Schema = new mongoose.Schema({
     required: true,
     unique: false,
   },
-  orders: {
-    type: Array,
-    required: true,
-    unique: false,
-  },
+  // orders: {
+  //   type: Array,
+  //   required: true,
+  //   unique: false,
+  // },
 });
 
 let code: Model<ICode>;

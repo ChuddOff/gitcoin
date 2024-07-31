@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { NextUIProvider } from "@nextui-org/react";
 import Header from "@/components/header/Header";
 import Footer from "@/components/footer/Footer";
+import { Toaster } from "react-hot-toast";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -28,6 +29,31 @@ export default function RootLayout({
             <Header />
             {children}
             <Footer />
+            <Toaster
+              position="top-center"
+              reverseOrder={false}
+              gutter={8}
+              containerClassName=""
+              containerStyle={{}}
+              toastOptions={{
+                // Define default options
+                className: "",
+                duration: 5000,
+                style: {
+                  background: "#363636",
+                  color: "#fff",
+                },
+
+                // Default options for specific types
+                success: {
+                  duration: 3000,
+                  theme: {
+                    primary: "green",
+                    secondary: "black",
+                  },
+                },
+              }}
+            />
           </NextUIProvider>
         </body>
       </html>

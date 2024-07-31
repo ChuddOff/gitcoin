@@ -29,6 +29,8 @@ export async function PUT(req: NextRequest) {
 
     profile.pocket = new Map(Object.entries(profile.pocket));
 
+    console.log(1);
+
     if (profile.pocket.has(bodyObject.coin)) {
       profile.pocket.set(
         bodyObject.coin,
@@ -41,6 +43,8 @@ export async function PUT(req: NextRequest) {
     await profile.save();
     return NextResponse.json({ status: 200 });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json({ status: 400, error: error });
   }
 }
