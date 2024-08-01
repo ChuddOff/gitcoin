@@ -14,52 +14,24 @@ import {
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import { api } from "../../trpc/react";
 
 interface OHLCData {
   bids: number[][];
   asks: number[][];
 }
 
-async function getData(type: string) {
-  let response = await fetch("/api/getData?type=" + type, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-}
-
 const Orders: React.FC = () => {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
 
-  const [data, setData] = useState<OHLCData>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const type =
+    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+    "/USDT";
 
-  async function fetchData() {
-    try {
-      const newData = await getData(
-        (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
-          "/USDT"
-      );
-      setData(newData.order ?? data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData(); // Первоначальный запрос данных
-
-    const interval = setInterval(() => {
-      fetchData();
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { data: response, isLoading } = api.coin.getData.useQuery({
+    type,
+  });
 
   return (
     <div className="flex w-full flex-col h-full">
@@ -117,17 +89,17 @@ const Orders: React.FC = () => {
                   </TableColumn>
                 </TableHeader>
                 <TableBody
-                  items={data?.asks.slice(42) || []}
+                  items={response?.asks.slice(42) || []}
                   isLoading={isLoading}
                   loadingContent={<Spinner label="Loading..." />}
                 >
                   {(item) => (
-                    <TableRow key={data?.asks.indexOf(item)}>
+                    <TableRow key={response?.asks.indexOf(item)}>
                       <TableCell>{item[0]}</TableCell>
                       <TableCell>{item[1].toFixed(4)}</TableCell>
                       <TableCell>
-                        {data?.asks
-                          .slice(data?.asks.indexOf(item) ?? 42)
+                        {response?.asks
+                          .slice(response?.asks.indexOf(item) ?? 42)
                           .map((item) => item[1])
                           .reduce((a, b) => {
                             return a + b;
@@ -140,7 +112,7 @@ const Orders: React.FC = () => {
               </Table>
               <div>
                 <h3 className="text-[#ef454a] font-[700] text-[15px] px-[10px] py-[4px]">
-                  {data ? data?.asks[0][0] : ""}
+                  {response ? response?.asks[0][0] : ""}
                 </h3>
               </div>
               <Table
@@ -167,16 +139,16 @@ const Orders: React.FC = () => {
                   <TableColumn>Всего(BTC)</TableColumn>
                 </TableHeader>
                 <TableBody
-                  items={data?.bids.slice(0, 8) || []}
+                  items={response?.bids.slice(0, 8) || []}
                   loadingContent={<Spinner label="Loading..." />}
                 >
                   {(item) => (
-                    <TableRow key={data?.bids.indexOf(item)}>
+                    <TableRow key={response?.bids.indexOf(item)}>
                       <TableCell>{item[0]}</TableCell>
                       <TableCell>{item[1].toFixed(4)}</TableCell>
                       <TableCell>
-                        {data?.bids
-                          .slice(0, data?.bids.indexOf(item) + 1 ?? 8)
+                        {response?.bids
+                          .slice(0, response?.bids.indexOf(item) + 1 ?? 8)
                           .map((item) => item[1])
                           .reduce((a, b) => {
                             return a + b;
@@ -192,20 +164,20 @@ const Orders: React.FC = () => {
                   className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all  items-center gap-[5px]"
                   style={{
                     width: `calc(${
-                      data
-                        ? (data?.bids
+                      response
+                        ? (response?.bids
                             .slice(42)
                             .map((item) => item[1])
                             .reduce((a, b) => {
                               return a + b;
                             }, 0) /
-                            (data?.bids
+                            (response?.bids
                               .slice(0, 8)
                               .map((item) => item[1])
                               .reduce((a, b) => {
                                 return a + b;
                               }, 0) +
-                              data?.asks
+                              response?.asks
                                 .slice(42)
                                 .map((item) => item[1])
                                 .reduce((a, b) => {
@@ -220,21 +192,21 @@ const Orders: React.FC = () => {
                     B
                   </div>
                   <h3 className="text-[#45be84] font-[500] text-[15px]">
-                    {data &&
+                    {response &&
                       (
-                        (data?.bids
+                        (response?.bids
                           .slice(42)
                           .map((item) => item[1])
                           .reduce((a, b) => {
                             return a + b;
                           }, 0) /
-                          (data?.bids
+                          (response?.bids
                             .slice(0, 8)
                             .map((item) => item[1])
                             .reduce((a, b) => {
                               return a + b;
                             }, 0) +
-                            data?.asks
+                            response?.asks
                               .slice(42)
                               .map((item) => item[1])
                               .reduce((a, b) => {
@@ -246,22 +218,22 @@ const Orders: React.FC = () => {
                 </div>
                 <div className="rounded-[5px] flex w-full bg-[#ffeaea] justify-end w-min-[55px] items-center gap-[5px]">
                   <h3 className="text-[#ef484d] font-[500] text-[15px]">
-                    {data &&
+                    {response &&
                       (
                         100 -
-                        (data?.bids
+                        (response?.bids
                           .slice(42)
                           .map((item) => item[1])
                           .reduce((a, b) => {
                             return a + b;
                           }, 0) /
-                          (data?.bids
+                          (response?.bids
                             .slice(0, 8)
                             .map((item) => item[1])
                             .reduce((a, b) => {
                               return a + b;
                             }, 0) +
-                            data?.asks
+                            response?.asks
                               .slice(42)
                               .map((item) => item[1])
                               .reduce((a, b) => {

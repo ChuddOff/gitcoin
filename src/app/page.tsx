@@ -1,8 +1,8 @@
-import Image from "next/image";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { getServerAuthSession } from "../server/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerAuthSession();
   return (
     <main className="flex min-h-screen flex-col items-center justify-between h-full w-full bg-gradient-to-b from-[#2EDEBE] to-[#A098FF]">
       <div
@@ -12,28 +12,10 @@ export default function Home() {
         <h1 className="text-[72px] font-[700] mt-[61px] drop-shadow">
           TRADE WITH GITCOIN
         </h1>
-
+        {session?.user.deposit}
         <div className="mt-[32px]">
-          <div className={"flex gap-[16px]"}>
-            <SignUpButton>
-              <div
-                className={
-                  "w-[87px] h-[40px] rounded-[8px] bg-white flex items-center justify-center cursor-pointer"
-                }
-              >
-                <h3 className="font-[700] text-[16px] text-black">Register</h3>
-              </div>
-            </SignUpButton>
-            <SignInButton>
-              <div
-                className={
-                  "w-[87px] h-[40px] rounded-[8px] bg-black flex items-center justify-center cursor-pointer"
-                }
-              >
-                <h3 className="font-[700] text-[16px] text-white">Log in</h3>
-              </div>
-            </SignInButton>
-          </div>
+          <Link href={"/login"}>Login</Link>
+          <Link href={"/register"}>Register</Link>
         </div>
       </div>
     </main>

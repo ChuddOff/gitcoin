@@ -11,21 +11,12 @@ import {
 } from "@nextui-org/react";
 import Search from "../search/Search";
 import Image from "next/image";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-  UserButton,
-  useSignUp,
-} from "@clerk/nextjs";
-import { useUser } from "@clerk/nextjs";
 import { redirect, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
-  const { user } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { isSignedIn, isLoaded } = useAuth();
 
   const [input, setInput] = useState<string>("");
 
@@ -93,27 +84,7 @@ const Header = () => {
             />
           </Link>
         </NavbarItem>
-        <NavbarItem>
-          <SignedOut>
-            <SignInButton>
-              <Image
-                className="cursor-pointer"
-                src="/user.svg"
-                alt="logo"
-                width={32}
-                height={32}
-              />
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <div className={"flex gap-3"}>
-              <UserButton />
-              <Link className={"text-violet uppercase"} href="/profile">
-                {user?.username}
-              </Link>
-            </div>
-          </SignedIn>
-        </NavbarItem>
+        <NavbarItem>{session?.user.name}</NavbarItem>
       </NavbarContent>
     </Navbar>
   );

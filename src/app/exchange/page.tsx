@@ -2,7 +2,6 @@
 
 import "./page.css";
 import Image from "next/image";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts, { chart } from "highcharts/highstock";
@@ -33,99 +32,36 @@ import Chart from "@/components/chart/Chart";
 import Details from "@/components/details/Details";
 import Orders from "@/components/orders/Orders";
 import toast from "react-hot-toast";
-
-interface profileData {
-  _id: string;
-  nick: string;
-  deposit: number;
-  bonus: boolean;
-}
-
-async function getProfileData() {
-  let response = await fetch("/api/profile", {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-}
-async function getCost(type: string) {
-  let response = await fetch("/api/getCost?type=" + type, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-}
-async function putProfileData(cost: number, coin: string, amount: number) {
-  toast.promise(
-    fetch("/api/buy", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cost: cost,
-        coin: coin,
-        amount: amount,
-      }),
-    }),
-    {
-      loading: "Saving...",
-      success: <b>Settings saved!</b>,
-      error: <b>Could not save.</b>,
-    }
-  );
-}
+import { useSession } from "next-auth/react";
+import { api } from "../../trpc/react";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
-  const { user } = useUser();
 
-  const [profileCost, setProfileCost] = useState<number>();
-  const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
-
-  const [profileData, setProfileData] = useState<profileData>();
-  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
+  const { data: profileData } = useSession();
 
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<number>(0);
 
-  async function fetchProfileData() {
-    setIsLoadingProfile(true);
-    try {
-      const newData = await getProfileData();
-      setProfileData(newData.profile);
-      setIsLoadingProfile(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoadingProfile(false);
-    }
-  }
-
-  async function fetchCostData() {
-    setIsLoadingCost(true);
-    try {
-      const newData = await getCost(
-        (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
-          "/USDT"
-      );
-      setPrice(newData.prise);
-      setIsLoadingCost(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoadingCost(false);
-    }
-  }
+  const costs = api.coin.getCosts.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        setPrice(data.ask as number);
+        setFill(data.bid as number);
+      }
+    },
+  });
 
   useEffect(() => {
-    if (user?.id) {
-      fetchProfileData();
-    }
-  }, [user?.id]);
+    costs.mutate({ type });
+  }, []);
+
+  const type =
+    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+    "/USDT";
+
+  const putProfileData = api.coin.buy.useMutation();
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -200,9 +136,9 @@ export default function Home() {
             <h3 className="font-[800] text-[13px] text-black">
               Доступ Баланс:
             </h3>
-            {profileData ? (
+            {profileData?.user ? (
               <h3 className="font-[800] text-[13px] text-black">
-                {profileData.deposit}
+                {profileData.user.deposit}
               </h3>
             ) : (
               <Skeleton className="h-3 w-[70px] rounded-lg" />
@@ -213,11 +149,11 @@ export default function Home() {
               color="success"
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
               onClick={() =>
-                putProfileData(
-                  fill,
-                  tvwidgetsymbol ?? "BITSTAMP:BTCUSD",
-                  +(fill / price).toFixed(8)
-                )
+                putProfileData.mutate({
+                  cost: fill,
+                  coin: tvwidgetsymbol ?? "BITSTAMP:BTCUSD",
+                  amount: +(fill / price).toFixed(8),
+                })
               }
             >
               Купить
@@ -241,8 +177,10 @@ export default function Home() {
             endContent={
               <div className="h-full flex items-center justify-center w-[110px] ">
                 <Button
-                  onClick={fetchCostData}
-                  isLoading={isLoadingCost}
+                  onClick={() => {
+                    costs.mutate({ type });
+                  }}
+                  isLoading={costs.isPending}
                   className="text-[#45979f] font-[800] text-[12px] bg-transparent"
                 >
                   Последняя
@@ -291,7 +229,7 @@ export default function Home() {
             <ButtonGroup>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 10))
+                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 10))
                 }
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
@@ -300,7 +238,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 4))
+                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 4))
                 }
                 color="danger"
                 size="sm"
@@ -310,7 +248,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 2))
+                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 2))
                 }
                 color="danger"
                 size="sm"
@@ -320,7 +258,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) * 0.75))
+                  setFill(Math.floor((profileData?.user.deposit ?? 0) * 0.75))
                 }
                 color="danger"
                 size="sm"
@@ -329,7 +267,9 @@ export default function Home() {
                 75%
               </Button>
               <Button
-                onClick={() => setFill(Math.floor(profileData?.deposit ?? 0))}
+                onClick={() =>
+                  setFill(Math.floor(profileData?.user.deposit ?? 0))
+                }
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-l-[1px] border-black"
