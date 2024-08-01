@@ -47,8 +47,7 @@ export default function Home() {
   const costs = api.coin.getCosts.useMutation({
     onSuccess: (data) => {
       if (data) {
-        setPrice(data.ask as number);
-        setFill(data.bid as number);
+        setPrice(data.price as number);
       }
     },
   });

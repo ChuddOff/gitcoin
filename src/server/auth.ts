@@ -7,9 +7,12 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import type { JWT } from "next-auth/jwt";
 import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/server/db";
 import * as argon2 from "argon2";
+import { LoginSchema } from "@/schemas/login";
+import { z } from "zod";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -94,12 +97,16 @@ export const authOptions: NextAuthOptions = {
       };
     },
   },
-  secret: "s3cr3t", // replace it CHUD
+  secret: process.env.NEXTAUTH_SECRET as string,
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID as string,
       clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -113,23 +120,30 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
+
+        try {
+          LoginSchema.parse(credentials);
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            throw new Error(error.errors[0].message)
+          }
+        }
         const user = await db.user.findFirst({
           where: {
             name: credentials?.username,
           },
         });
-
-        if (!user || user.password) {
-          throw new Error("Invalid username or password");
+        if (!user) {
+          throw new Error("No user provided");
         }
 
-        const passwordMatch = argon2.verify(
+        const passwordMatch = await argon2.verify(
           user.password as string,
           credentials?.password as string
         );
 
         if (!passwordMatch) {
-          throw new Error("Invalid password");
+          throw new Error("Wrong password");
         }
 
         const { password, ...payload } = user;

@@ -1,5 +1,5 @@
+import { getServerAuthSession } from "@/server/auth";
 import Link from "next/link";
-import { getServerAuthSession } from "../server/auth";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -9,14 +9,19 @@ export default async function Home() {
         className="flex flex-col items-center w-[989px] h-[280px] bg-repeat	bg-center ] rounded-[9px] mt-[19px]"
         style={{ background: "url('/gitcoin.gif')" }}
       >
-        <h1 className="text-[72px] font-[700] mt-[61px] drop-shadow">
+        <h1 className="text-[72px] font-[700] mt-[61px] drop-shadow text-white">
           TRADE WITH GITCOIN
         </h1>
-        {session?.user.deposit}
-        <div className="mt-[32px]">
-          <Link href={"/login"}>Login</Link>
-          <Link href={"/register"}>Register</Link>
-        </div>
+        {!session?.user && (
+          <div className="mt-[32px] flex gap-2">
+            <Link href={"/login"} className=" py-1 px-2 bg-white rounded-lg">
+              Login
+            </Link>
+            <Link href={"/register"} className=" py-1 px-2 bg-white rounded-lg">
+              Register
+            </Link>
+          </div>
+        )}
       </div>
     </main>
   );

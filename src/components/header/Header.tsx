@@ -84,7 +84,25 @@ const Header = () => {
             />
           </Link>
         </NavbarItem>
-        <NavbarItem>{session?.user.name}</NavbarItem>
+        <NavbarItem>
+          {session?.user ? (
+            <div className=" flex items-center gap-2">
+              <Image
+                src={session?.user.image as string}
+                alt="profile"
+                width={32}
+                height={32}
+                className="cursor-pointer rounded-full"
+              />
+              <div>
+                <p className=" text-sm font-medium">{session?.user.name}</p>
+                <p className=" text-xs font-medium">{session?.user.email}</p>
+              </div>
+            </div>
+          ) : (
+            <Link href={"/login"}>Login</Link>
+          )}
+        </NavbarItem>
       </NavbarContent>
     </Navbar>
   );
