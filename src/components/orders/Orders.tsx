@@ -42,6 +42,8 @@ const Orders: React.FC = () => {
       return (a ?? 0) + (b ?? 0);
     }, 0);
 
+  console.log(bids, asks);
+
   return (
     <div className="flex w-full flex-col h-full">
       <Tabs
