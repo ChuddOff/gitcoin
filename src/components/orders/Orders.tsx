@@ -28,6 +28,20 @@ const Orders: React.FC = () => {
     type,
   });
 
+  const bids = response?.bids
+    .slice(42)
+    .map((item) => item[1])
+    .reduce((a, b) => {
+      return (a ?? 0) + (b ?? 0);
+    }, 0);
+
+  const asks = response?.asks
+    .slice(42)
+    .map((item) => item[1])
+    .reduce((a, b) => {
+      return (a ?? 0) + (b ?? 0);
+    }, 0);
+
   return (
     <div className="flex w-full flex-col h-full">
       <Tabs
@@ -91,15 +105,15 @@ const Orders: React.FC = () => {
                   {(item) => (
                     <TableRow key={response?.asks.indexOf(item)}>
                       <TableCell>{item[0]}</TableCell>
-                      <TableCell>{item[1].toFixed(4)}</TableCell>
+                      <TableCell>{item[1]!.toFixed(4)}</TableCell>
                       <TableCell>
-                        {response?.asks
+                        {response!.asks
                           .slice()
                           .reverse()
                           .slice(response?.asks.indexOf(item) ?? 42)
                           .map((item) => item[1])
                           .reduce((a, b) => {
-                            return a + b;
+                            return (a ?? 0) + (b ?? 0);
                           }, 0)
                           ?.toFixed(4)}
                       </TableCell>
@@ -142,13 +156,13 @@ const Orders: React.FC = () => {
                   {(item) => (
                     <TableRow key={response?.bids.indexOf(item)}>
                       <TableCell>{item[0]}</TableCell>
-                      <TableCell>{item[1].toFixed(4)}</TableCell>
+                      <TableCell>{item[1]!.toFixed(4)}</TableCell>
                       <TableCell>
                         {response?.bids
                           .slice(0, response?.bids.indexOf(item) + 1 ?? 8)
                           .map((item) => item[1])
                           .reduce((a, b) => {
-                            return a + b;
+                            return (a ?? 0) + (b ?? 0);
                           }, 0)
                           ?.toFixed(4)}
                       </TableCell>
@@ -162,25 +176,7 @@ const Orders: React.FC = () => {
                   style={{
                     width: `calc(${
                       response
-                        ? (response?.bids
-                            .slice(42)
-                            .map((item) => item[1])
-                            .reduce((a, b) => {
-                              return a + b;
-                            }, 0) /
-                            (response?.bids
-                              .slice(0, 8)
-                              .map((item) => item[1])
-                              .reduce((a, b) => {
-                                return a + b;
-                              }, 0) +
-                              response?.asks
-                                .slice(42)
-                                .map((item) => item[1])
-                                .reduce((a, b) => {
-                                  return a + b;
-                                }, 0))) *
-                          100
+                        ? (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100
                         : 50
                     }% + 55px)`,
                   }}
@@ -190,27 +186,9 @@ const Orders: React.FC = () => {
                   </div>
                   <h3 className="text-[#45be84] font-[500] text-[15px]">
                     {response &&
-                      (
-                        (response?.bids
-                          .slice(42)
-                          .map((item) => item[1])
-                          .reduce((a, b) => {
-                            return a + b;
-                          }, 0) /
-                          (response?.bids
-                            .slice(0, 8)
-                            .map((item) => item[1])
-                            .reduce((a, b) => {
-                              return a + b;
-                            }, 0) +
-                            response?.asks
-                              .slice(42)
-                              .map((item) => item[1])
-                              .reduce((a, b) => {
-                                return a + b;
-                              }, 0))) *
-                        100
-                      ).toFixed(0) + "%"}
+                      ((bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100).toFixed(
+                        0
+                      ) + "%"}
                   </h3>
                 </div>
                 <div className="rounded-[5px] flex w-full bg-[#ffeaea] justify-end w-min-[55px] items-center gap-[5px]">
@@ -218,25 +196,7 @@ const Orders: React.FC = () => {
                     {response &&
                       (
                         100 -
-                        (response?.bids
-                          .slice(42)
-                          .map((item) => item[1])
-                          .reduce((a, b) => {
-                            return a + b;
-                          }, 0) /
-                          (response?.bids
-                            .slice(0, 8)
-                            .map((item) => item[1])
-                            .reduce((a, b) => {
-                              return a + b;
-                            }, 0) +
-                            response?.asks
-                              .slice(42)
-                              .map((item) => item[1])
-                              .reduce((a, b) => {
-                                return a + b;
-                              }, 0))) *
-                          100
+                        (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100
                       ).toFixed(0) + "%"}
                   </h3>
                   <div className="rounded-[5px] border-[2px] border-[#ef464b] flex w-[29px] justify-center items-center text-[#ef484d] w-min-[29px]">
