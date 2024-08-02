@@ -6,10 +6,11 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, email, password } = body;
+  const { username, email, password } = body;
 
   try {
-    registerSchema.parse({ name, email, password });
+    console.log(body)
+    registerSchema.parse({ username, email, password });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
 
   await db.user.create({
     data: {
-      name,
+      name: username,
       email,
       password: hashedPassword,
       pocket: [],
