@@ -45,7 +45,7 @@ export const coinRouter = createTRPCRouter({
 
       const ticket = await exchange.fetchTicker(input.type);
 
-      return ticket;
+      return {price: ticket.last};
     }),
 
   getData: publicProcedure
