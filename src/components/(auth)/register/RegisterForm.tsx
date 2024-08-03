@@ -1,6 +1,5 @@
 "use client";
 
-import { LoginSchema } from "@/schemas/login";
 import { registerSchema } from "@/schemas/register";
 import { useMutation } from "@tanstack/react-query";
 import { signIn } from "next-auth/react";
@@ -32,7 +31,7 @@ export default function LoginForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: username,
+          username,
           password,
           email,
         }),
@@ -62,6 +61,7 @@ export default function LoginForm() {
         registerSchema.parse({ username, password, email });
     } catch (error) {
         if (error instanceof z.ZodError) {
+          console.log(error)
             error.issues.forEach((issue) => {
                 if (issue.path[0] === "username") {
                     setUsernameError(issue.message);

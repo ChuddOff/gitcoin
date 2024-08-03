@@ -6,7 +6,7 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, email, password } = body;
+  const { username, email, password } = body;
 
   try {
     console.log(name, email, password);
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
   await db.user.create({
     data: {
-      name,
+      name: username,
       email,
       password: hashedPassword,
       pocket: [],
