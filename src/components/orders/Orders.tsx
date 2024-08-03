@@ -24,9 +24,14 @@ const Orders: React.FC = () => {
     (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
     "/USDT";
 
-  const { data: response, isLoading } = api.coin.getData.useQuery({
-    type,
-  });
+  const { data: response, isLoading } = api.coin.getData.useQuery(
+    {
+      type,
+    },
+    {
+      refetchInterval: 3000,
+    }
+  );
 
   const bids = response?.bids
     .slice(0, 8)

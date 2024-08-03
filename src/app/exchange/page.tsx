@@ -35,11 +35,18 @@ import Orders from "@/components/orders/Orders";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { api } from "../../trpc/react";
-import YourOrders from "@/components/yourOrders/yourOrders";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
+
+  const addOrder = api.order.addOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(data.massage);
+      }
+    },
+  });
 
   const { data: profileData } = useSession();
 
@@ -201,12 +208,14 @@ export default function Home() {
           <div className="mt-[17px] flex items-center gap-[30px]">
             <Button
               color="success"
+              isLoading={addOrder.isPending}
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
               onClick={() =>
-                putProfileData.mutate({
-                  cost: fill,
-                  coin: tvwidgetsymbol ?? "BITSTAMP:BTCUSD",
-                  amount: +(fill / price).toFixed(8),
+                addOrder.mutate({
+                  type: "buy",
+                  price: price,
+                  fill: fill,
+                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
                 })
               }
             >
@@ -215,6 +224,15 @@ export default function Home() {
             <Button
               color="danger"
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
+              isLoading={addOrder.isPending}
+              onClick={() =>
+                addOrder.mutate({
+                  type: "sell",
+                  price: price,
+                  fill: fill,
+                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                })
+              }
             >
               Продать
             </Button>

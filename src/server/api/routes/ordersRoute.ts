@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { symbol, z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { OrderType } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -19,12 +19,13 @@ export const ordersRouter = createTRPCRouter({
         type: z.enum(["buy", "sell"] as [OrderType, OrderType]),
         price: z.number(),
         fill: z.number(),
+        symbol: z.string(),
       })
     )
-    .mutation(({ ctx, input }) => {
-      const { price, type, fill } = input;
+    .mutation(async ({ ctx, input }) => {
+      const { price, type, fill, symbol } = input;
 
-      return ctx.db.orders.create({
+      const order = await ctx.db.orders.create({
         data: {
           user: {
             connect: {
@@ -34,8 +35,10 @@ export const ordersRouter = createTRPCRouter({
           orderPrice: price,
           type,
           fill,
+          symbol,
         },
       });
+      return { massage: "Успешно!" };
     }),
 
   updateOrder: protectedProcedure
