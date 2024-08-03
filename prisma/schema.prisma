@@ -40,6 +40,23 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum OrderType {
+  buy
+  sell
+}
+
+model Orders {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    type OrderType
+    orderPrice Float
+    TakeProfit Float @default(0)
+    fill Int
+    StopLoss Float @default(0)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @db.ObjectId
+    completed Boolean @default(false)
+}
+
 model User {
     id            String @id @default(auto()) @map("_id") @db.ObjectId
     name          String
@@ -48,7 +65,7 @@ model User {
     deposit       Int   @default(10000)
     bonus         Boolean @default(true)
     pocket        Json[] @default([])
-    orders        Json[] @default([])
+    orders  Orders[]
     emailVerified DateTime?
     image         String
     accounts      Account[]
