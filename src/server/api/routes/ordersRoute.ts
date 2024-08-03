@@ -5,12 +5,23 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 
 export const ordersRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.orders.findMany({
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    const order = await ctx.db.orders.findMany({
       where: {
         userId: ctx.session.user.id,
       },
+      select: {
+        id: true,
+        orderPrice: true,
+        type: true,
+        fill: true,
+        symbol: true,
+        TakeProfit: true,
+        StopLoss: true,
+      },
     });
+
+    return order
   }),
   // тип цена ордера заполнить по стоимости тп сл
   buyOrder: protectedProcedure
@@ -65,7 +76,7 @@ export const ordersRouter = createTRPCRouter({
           symbol,
         },
       });
-      
+
       return { massage: "Успешно!" };
     }),
 
@@ -78,10 +89,10 @@ export const ordersRouter = createTRPCRouter({
         fill: z.number({ message: "fill must be a number" }),
       })
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { id, fill } = input;
 
-      const isOrderExist = ctx.db.orders.findUnique({
+      const isOrderExist = await ctx.db.orders.findUnique({
         where: {
           id,
         },
@@ -95,7 +106,7 @@ export const ordersRouter = createTRPCRouter({
       }
 
       try {
-        return ctx.db.orders.update({
+        return await ctx.db.orders.update({
           where: {
             id,
           },
@@ -121,9 +132,9 @@ export const ordersRouter = createTRPCRouter({
         id: z.string(),
       })
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { id } = input;
-      return ctx.db.orders.update({
+      return await ctx.db.orders.update({
         where: {
           id,
         },
