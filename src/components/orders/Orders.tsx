@@ -29,20 +29,23 @@ const Orders: React.FC = () => {
   });
 
   const bids = response?.bids
-    .slice(42)
+    .slice(0, 8)
     .map((item) => item[1])
     .reduce((a, b) => {
       return (a ?? 0) + (b ?? 0);
     }, 0);
 
   const asks = response?.asks
-    .slice(42)
+    .slice(0, 8)
+    .reverse()
     .map((item) => item[1])
     .reduce((a, b) => {
       return (a ?? 0) + (b ?? 0);
     }, 0);
 
-  console.log(bids, asks);
+  console.log(response);
+
+  console.log(asks);
 
   return (
     <div className="flex w-full flex-col h-full">
@@ -100,7 +103,7 @@ const Orders: React.FC = () => {
                   </TableColumn>
                 </TableHeader>
                 <TableBody
-                  items={response?.asks.slice().reverse().slice(42) || []}
+                  items={response?.asks.slice(0, 8).reverse() || []}
                   isLoading={isLoading}
                   loadingContent={<Spinner label="Loading..." />}
                 >
@@ -110,9 +113,8 @@ const Orders: React.FC = () => {
                       <TableCell>{item[1]!.toFixed(4)}</TableCell>
                       <TableCell>
                         {response!.asks
-                          .slice()
+                          .slice(0, (response?.asks.indexOf(item) ?? 8) + 1)
                           .reverse()
-                          .slice(response?.asks.indexOf(item) ?? 42)
                           .map((item) => item[1])
                           .reduce((a, b) => {
                             return (a ?? 0) + (b ?? 0);

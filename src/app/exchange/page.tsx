@@ -12,6 +12,7 @@ import {
   ButtonGroup,
   Card,
   CardBody,
+  Chip,
   Input,
   Skeleton,
   Spinner,
@@ -34,6 +35,7 @@ import Orders from "@/components/orders/Orders";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { api } from "../../trpc/react";
+import YourOrders from "@/components/yourOrders/yourOrders";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -97,8 +99,61 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
+                        <Table
+                          aria-label="Example static collection table"
+                          radius="sm"
+                          classNames={{
+                            th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
+                            base: "p-[0px] m-[0px] h-[165px] ",
+                            table: "p-[0px] m-[0px] h-[5px] ",
+                            tbody: "p-[0px] m-[0px] h-[5px]",
+                            emptyWrapper: "p-[0px] m-[0px] h-[5px]",
+                            wrapper: "p-[0px] m-[0px] h-full bg-white",
+                            td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
+                          }}
+                        >
+                          <TableHeader>
+                            <TableColumn>Тип</TableColumn>
+                            <TableColumn>Цена оредера</TableColumn>
+                            <TableColumn>Маржа</TableColumn>
+                            <TableColumn>TP/SL</TableColumn>
+                            <TableColumn>Действия</TableColumn>
+                          </TableHeader>
+                          <TableBody
+                          //   items={response?.bids.slice(0, 8) || []}
+                          //   loadingContent={<Spinner label="Loading..." />}
+                          >
+                            {/* {(item) => ( */}
+                            <TableRow
+                            // key={response?.bids.indexOf(item)}
+                            >
+                              <TableCell>
+                                <Chip
+                                  size="lg"
+                                  variant="shadow"
+                                  classNames={{
+                                    base: "bg-[#6eed79] h-[25px]",
+                                    content: "text-[#397730]",
+                                  }}
+                                >
+                                  New
+                                </Chip>
+                              </TableCell>
+                              <TableCell>66.372,25 USDT</TableCell>
+                              <TableCell>547 USDT</TableCell>
+                              <TableCell>547 USDT</TableCell>
+                              <TableCell>
+                                <div className="flex gap-[9px]">
+                                  <Button>Установить TP/SL</Button>
+                                  <Button>Закрыть по рс</Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                            {/* )} */}
+                          </TableBody>
+                        </Table>
+                      </div>
                     </CardBody>
                   </Card>
                 </Tab>

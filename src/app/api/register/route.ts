@@ -9,8 +9,7 @@ export async function POST(req: Request) {
   const { username, email, password } = body;
 
   try {
-    console.log(name, email, password);
-    registerSchema.parse({ name, email, password });
+    registerSchema.parse({ username, email, password });
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.log(error);
