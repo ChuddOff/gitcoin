@@ -9,7 +9,6 @@ export async function POST(req: Request) {
   const { username, email, password } = body;
 
   try {
-    console.log(username, email, password);
     registerSchema.parse({ username, email, password });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -48,7 +47,6 @@ export async function POST(req: Request) {
       email,
       password: hashedPassword,
       pocket: [],
-      orders: [],
       bonus: false,
       deposit: 10000,
       image:
