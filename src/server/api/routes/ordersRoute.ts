@@ -13,17 +13,16 @@ export const ordersRouter = createTRPCRouter({
     });
   }),
   // тип цена ордера заполнить по стоимости тп сл
-  addOrder: protectedProcedure
+  buyOrder: protectedProcedure
     .input(
       z.object({
-        type: z.enum(["buy", "sell"] as [OrderType, OrderType]),
         price: z.number(),
         fill: z.number(),
         symbol: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { price, type, fill, symbol } = input;
+      const { price, fill, symbol } = input;
 
       const order = await ctx.db.orders.create({
         data: {
@@ -33,11 +32,40 @@ export const ordersRouter = createTRPCRouter({
             },
           },
           orderPrice: price,
-          type,
+          type: 'buy',
           fill,
           symbol,
         },
       });
+
+      return { massage: "Успешно!" };
+    }),
+
+    sellOrder: protectedProcedure
+    .input(
+      z.object({
+        price: z.number(),
+        fill: z.number(),
+        symbol: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { price, fill, symbol } = input;
+
+      const order = await ctx.db.orders.create({
+        data: {
+          user: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
+          orderPrice: price,
+          type: 'sell',
+          fill,
+          symbol,
+        },
+      });
+      
       return { massage: "Успешно!" };
     }),
 
