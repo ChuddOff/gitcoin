@@ -18,10 +18,11 @@ export const ordersRouter = createTRPCRouter({
         symbol: true,
         TakeProfit: true,
         StopLoss: true,
+        completed: true,
       },
     });
 
-    return order
+    return order;
   }),
   // тип цена ордера заполнить по стоимости тп сл
   buyOrder: protectedProcedure
@@ -43,7 +44,7 @@ export const ordersRouter = createTRPCRouter({
             },
           },
           orderPrice: price,
-          type: 'buy',
+          type: "buy",
           fill,
           symbol,
         },
@@ -52,7 +53,7 @@ export const ordersRouter = createTRPCRouter({
       return { massage: "Успешно!" };
     }),
 
-    sellOrder: protectedProcedure
+  sellOrder: protectedProcedure
     .input(
       z.object({
         price: z.number(),
@@ -71,7 +72,7 @@ export const ordersRouter = createTRPCRouter({
             },
           },
           orderPrice: price,
-          type: 'sell',
+          type: "sell",
           fill,
           symbol,
         },
@@ -86,11 +87,10 @@ export const ordersRouter = createTRPCRouter({
         id: z.string(),
         tp: z.number({ message: "tp must be a number" }),
         sl: z.number({ message: "sl must be a number" }),
-        fill: z.number({ message: "fill must be a number" }),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, fill } = input;
+      const { id, tp, sl } = input;
 
       const isOrderExist = await ctx.db.orders.findUnique({
         where: {
@@ -111,7 +111,8 @@ export const ordersRouter = createTRPCRouter({
             id,
           },
           data: {
-            fill,
+            TakeProfit: tp,
+            StopLoss: sl,
           },
         });
       } catch (error) {

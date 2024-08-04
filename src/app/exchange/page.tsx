@@ -35,12 +35,26 @@ import Orders from "@/components/orders/Orders";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { api } from "../../trpc/react";
+import YourOrders from "@/components/userOrders/yourOrders/YourOrders";
+import OrdersHistory from "@/components/userOrders/ordersHistory/OrdersHistory";
+import TradeHistory from "@/components/userOrders/tradeHistory/TradeHistory";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
 
-  const addOrder = api.order.addOrder.useMutation({
+  const typeCoin =
+    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+    "/USDT";
+
+  const buyOrder = api.order.buyOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(data.massage);
+      }
+    },
+  });
+  const sellOrder = api.order.sellOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
         toast.success(data.massage);
@@ -53,23 +67,9 @@ export default function Home() {
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<number>(0);
 
-  const costs = api.coin.getCosts.useMutation({
-    onSuccess: (data) => {
-      if (data) {
-        setPrice(data.price as number);
-      }
-    },
+  const costs = api.coin.getCosts.useQuery({
+    type: typeCoin,
   });
-
-  useEffect(() => {
-    costs.mutate({ type });
-  }, []);
-
-  const type =
-    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
-    "/USDT";
-
-  const putProfileData = api.coin.buy.useMutation();
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -106,61 +106,7 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
-                        <Table
-                          aria-label="Example static collection table"
-                          radius="sm"
-                          classNames={{
-                            th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-                            base: "p-[0px] m-[0px] h-[165px] ",
-                            table: "p-[0px] m-[0px] h-[5px] ",
-                            tbody: "p-[0px] m-[0px] h-[5px]",
-                            emptyWrapper: "p-[0px] m-[0px] h-[5px]",
-                            wrapper: "p-[0px] m-[0px] h-full bg-white",
-                            td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
-                          }}
-                        >
-                          <TableHeader>
-                            <TableColumn>Тип</TableColumn>
-                            <TableColumn>Цена оредера</TableColumn>
-                            <TableColumn>Маржа</TableColumn>
-                            <TableColumn>TP/SL</TableColumn>
-                            <TableColumn>Действия</TableColumn>
-                          </TableHeader>
-                          <TableBody
-                          //   items={response?.bids.slice(0, 8) || []}
-                          //   loadingContent={<Spinner label="Loading..." />}
-                          >
-                            {/* {(item) => ( */}
-                            <TableRow
-                            // key={response?.bids.indexOf(item)}
-                            >
-                              <TableCell>
-                                <Chip
-                                  size="lg"
-                                  variant="shadow"
-                                  classNames={{
-                                    base: "bg-[#6eed79] h-[25px]",
-                                    content: "text-[#397730]",
-                                  }}
-                                >
-                                  New
-                                </Chip>
-                              </TableCell>
-                              <TableCell>66.372,25 USDT</TableCell>
-                              <TableCell>547 USDT</TableCell>
-                              <TableCell>547 USDT</TableCell>
-                              <TableCell>
-                                <div className="flex gap-[9px]">
-                                  <Button>Установить TP/SL</Button>
-                                  <Button>Закрыть по рс</Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                            {/* )} */}
-                          </TableBody>
-                        </Table>
-                      </div>
+                      <YourOrders />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -171,8 +117,7 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <OrdersHistory />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -183,8 +128,7 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <TradeHistory />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -208,11 +152,10 @@ export default function Home() {
           <div className="mt-[17px] flex items-center gap-[30px]">
             <Button
               color="success"
-              isLoading={addOrder.isPending}
+              isLoading={buyOrder.isPending}
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
               onClick={() =>
-                addOrder.mutate({
-                  type: "buy",
+                buyOrder.mutate({
                   price: price,
                   fill: fill,
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
@@ -224,10 +167,9 @@ export default function Home() {
             <Button
               color="danger"
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
-              isLoading={addOrder.isPending}
+              isLoading={sellOrder.isPending}
               onClick={() =>
-                addOrder.mutate({
-                  type: "sell",
+                sellOrder.mutate({
                   price: price,
                   fill: fill,
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
@@ -250,7 +192,9 @@ export default function Home() {
               <div className="h-full flex items-center justify-center w-[110px] ">
                 <Button
                   onClick={() => {
-                    costs.mutate({ type });
+                    costs.refetch().then(() => {
+                      setPrice(costs.data?.price || price);
+                    });
                   }}
                   isLoading={costs.isPending}
                   className="text-[#45979f] font-[800] text-[12px] bg-transparent"

@@ -40,12 +40,12 @@ export const coinRouter = createTRPCRouter({
 
   getCosts: publicProcedure
     .input(z.object({ type: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const exchange = new ccxt.bigone();
 
       const ticket = await exchange.fetchTicker(input.type);
 
-      return {price: ticket.last};
+      return { price: ticket.last };
     }),
 
   getData: publicProcedure
