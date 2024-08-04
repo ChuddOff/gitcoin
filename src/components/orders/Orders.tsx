@@ -48,9 +48,10 @@ const Orders: React.FC = () => {
       return (a ?? 0) + (b ?? 0);
     }, 0);
 
-  console.log(response);
-
-  console.log(asks);
+  const percent =
+    bids && asks && (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100 < 100
+      ? (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100
+      : 100;
 
   return (
     <div className="flex w-full flex-col h-full">
@@ -183,30 +184,19 @@ const Orders: React.FC = () => {
                 <div
                   className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all  items-center gap-[5px]"
                   style={{
-                    width: `calc(${
-                      response
-                        ? (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100
-                        : 50
-                    }% + 55px)`,
+                    width: `calc(${response ? percent : 50}% + 55px)`,
                   }}
                 >
                   <div className="transition-[1s] transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
                     B
                   </div>
                   <h3 className="text-[#45be84] font-[500] text-[15px]">
-                    {response &&
-                      ((bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100).toFixed(
-                        0
-                      ) + "%"}
+                    {response && percent.toFixed(0) + "%"}
                   </h3>
                 </div>
                 <div className="rounded-[5px] flex w-full bg-[#ffeaea] justify-end w-min-[55px] items-center gap-[5px]">
                   <h3 className="text-[#ef484d] font-[500] text-[15px]">
-                    {response &&
-                      (
-                        100 -
-                        (bids ?? 1 / (bids ?? 1 + (asks ?? 1))) * 100
-                      ).toFixed(0) + "%"}
+                    {response && (100 - percent).toFixed(0) + "%"}
                   </h3>
                   <div className="rounded-[5px] border-[2px] border-[#ef464b] flex w-[29px] justify-center items-center text-[#ef484d] w-min-[29px]">
                     S
