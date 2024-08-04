@@ -98,6 +98,17 @@ export const ordersRouter = createTRPCRouter({
         },
       });
 
+      const userOrders = ctx.session.user.orders
+
+      const isUserOrderExist = userOrders.find((order) => order.id === id)
+
+      if (!isUserOrderExist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid order",
+        });
+      }
+
       if (!isOrderExist) {
         throw new TRPCError({
           code: "NOT_FOUND",

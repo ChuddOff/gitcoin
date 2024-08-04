@@ -13,6 +13,7 @@ import { db } from "@/server/db";
 import * as argon2 from "argon2";
 import { LoginSchema } from "@/schemas/login";
 import { z } from "zod";
+import { Orders } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -29,7 +30,7 @@ declare module "next-auth" {
       deposit: number;
       bonus: boolean;
       pocket: Object[];
-      orders: Object[];
+      orders: Orders[];
     } & DefaultSession["user"];
   }
 }
@@ -43,7 +44,7 @@ declare module "next-auth/jwt" {
     deposit: number;
     bonus: boolean;
     pocket: Object[];
-    orders: Object[];
+    orders: Orders[];
   }
 }
 
@@ -67,6 +68,15 @@ export const authOptions: NextAuthOptions = {
         where: {
           id: token.sub,
         },
+        select: {
+          name: true,
+          email: true,
+          image: true,
+          deposit: true,
+          bonus: true,
+          pocket: true,
+          orders: true,
+        },
       });
 
       // return to session default token and role, likedPosts
@@ -78,7 +88,7 @@ export const authOptions: NextAuthOptions = {
         pocket: dbuser!.pocket as Object[],
         deposit: dbuser!.deposit,
         bonus: dbuser!.bonus,
-        orders: dbuser!.orders as Object[],
+        orders: dbuser!.orders,
       };
     },
     session: ({ session, token }) => {
@@ -92,7 +102,7 @@ export const authOptions: NextAuthOptions = {
           deposit: token.deposit,
           bonus: token.bonus,
           pocket: token.pocket as Object[],
-          orders: token.orders as Object[],
+          orders: token.orders,
         },
       };
     },
