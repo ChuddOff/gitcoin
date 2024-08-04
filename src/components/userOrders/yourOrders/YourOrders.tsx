@@ -36,18 +36,15 @@ const YourOrders: React.FC = () => {
     refetchInterval: 3000,
   });
 
-  const costs = api.coin.getCosts.useQuery(
-    {
-      type: typeCoin,
-    },
-    {
-      refetchInterval: 3000,
-    }
-  );
+  const costs = api.coin.getCosts.useQuery({
+    type: typeCoin,
+  });
 
   const updateOrder = api.order.updateOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
+        console.log(data);
+
         toast.success("TP и SL успешно изменены!");
       }
     },
@@ -56,8 +53,8 @@ const YourOrders: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [currentOrder, setCurrentOrder] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [TP, setTP] = useState<number>();
-  const [SL, setSL] = useState<number>();
+  const [TP, setTP] = useState<number>(0);
+  const [SL, setSL] = useState<number>(0);
 
   return (
     <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
@@ -127,14 +124,17 @@ const YourOrders: React.FC = () => {
               <TableCell>
                 <div className="flex gap-[9px]">
                   <Button
+                    size="sm"
                     onClick={() => {
                       setCurrentOrder(item.id);
+                      setTP(item.TakeProfit);
+                      setSL(item.StopLoss);
                       onOpen();
                     }}
                   >
                     Установить TP/SL
                   </Button>
-                  <Button>Закрыть по рс</Button>
+                  <Button size="sm">Закрыть по рс</Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -146,7 +146,7 @@ const YourOrders: React.FC = () => {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 text-black">
-                Укажите TP и SL (поля необязательные)
+                Укажите TP и SL <br /> (Значение 0 - не установливать)
               </ModalHeader>
               <ModalBody>
                 <Input
@@ -155,25 +155,30 @@ const YourOrders: React.FC = () => {
                   type="number"
                   variant="bordered"
                   className="text-black"
+                  onChange={(e) => setTP(Number(e.target.value))}
+                  value={TP?.toString()}
                 />
                 <Input
                   label="SL"
                   type="number"
                   variant="bordered"
                   className="text-black"
+                  onChange={(e) => setSL(Number(e.target.value))}
+                  value={SL?.toString()}
                 />
                 <div className="flex py-2 px-1 justify-between"></div>
               </ModalBody>
               <ModalFooter>
                 <Button
+                  isLoading={updateOrder.isPending}
                   color="primary"
                   onPress={() => {
-                    onClose();
                     updateOrder.mutate({
                       id: currentOrder,
                       tp: TP ?? 0,
                       sl: SL ?? 0,
                     });
+                    onClose();
                   }}
                 >
                   Подтвердить

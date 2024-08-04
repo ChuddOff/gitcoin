@@ -196,7 +196,7 @@ export default function Home() {
                       setPrice(costs.data?.price || price);
                     });
                   }}
-                  isLoading={costs.isPending}
+                  isLoading={costs.isFetching}
                   className="text-[#45979f] font-[800] text-[12px] bg-transparent"
                 >
                   Последняя
