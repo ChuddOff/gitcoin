@@ -10,7 +10,7 @@ import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/server/db";
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { LoginSchema } from "@/schemas/login";
 import { z } from "zod";
 import { Orders } from "@prisma/client";
@@ -131,6 +131,10 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
 
+        if(!credentials?.username || !credentials?.password) {
+          throw new Error("No credentials provided");
+        }
+
         try {
           LoginSchema.parse(credentials);
         } catch (error) {
@@ -147,9 +151,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No user provided");
         }
 
-        const passwordMatch = await argon2.verify(
-          user.password as string,
-          credentials?.password as string
+        // means user trying login to discord account
+        if(!user.password) {
+          throw new Error("Invalid credentials");
+        }
+
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          user.password
         );
 
         if (!passwordMatch) {
