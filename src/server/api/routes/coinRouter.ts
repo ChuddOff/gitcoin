@@ -8,13 +8,16 @@ import {
 import ccxt from "ccxt";
 
 export const coinRouter = createTRPCRouter({
-  buy: publicProcedure
+  buy: protectedProcedure
     .input(z.object({ cost: z.number(), coin: z.string(), amount: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const user = ctx.session?.user;
+      const { user } = ctx.session;
 
-      if (!user) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (user.deposit < input.amount) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Balance is not enough",
+        });
       }
 
       const profilePocket = new Map(Object.entries(user.pocket));
@@ -43,33 +46,10 @@ export const coinRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getCosts: publicProcedure
-    .input(z.object({ type: z.string() }))
-    .query(async ({ input }) => {
-      const exchange = new ccxt.bigone();
-
-      const ticket = await exchange.fetchTicker(input.type);
-
-      return { price: ticket.last };
-    }),
-
-  getData: publicProcedure
-    .input(z.object({ type: z.string() }))
-    .query(async ({ input }) => {
-      const exchange = new ccxt.bigone();
-      const orderBook = await exchange.fetchOrderBook(input.type);
-
-      return orderBook;
-    }),
-
-  sell: publicProcedure
+  sell: protectedProcedure
     .input(z.object({ cost: z.number(), coin: z.string(), amount: z.number() }))
     .query(({ ctx, input }) => {
-      const user = ctx.session?.user;
-
-      if (!user) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      const { user } = ctx.session;
 
       const profilePocket = new Map(Object.entries(user.pocket));
 
@@ -91,5 +71,24 @@ export const coinRouter = createTRPCRouter({
           pocket: Object.fromEntries(profilePocket),
         },
       });
+    }),
+
+  getCosts: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(async ({ input }) => {
+      const exchange = new ccxt.bigone();
+
+      const ticket = await exchange.fetchTicker(input.type);
+
+      return { price: ticket.last };
+    }),
+
+  getData: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(async ({ input }) => {
+      const exchange = new ccxt.bigone();
+      const orderBook = await exchange.fetchOrderBook(input.type);
+
+      return orderBook;
     }),
 });

@@ -31,12 +31,20 @@ export const ordersRouter = createTRPCRouter({
         price: z.number(),
         fill: z.number(),
         symbol: z.string(),
+        isAlreadyCompleted: z.boolean(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const { price, fill, symbol } = input;
 
-      const order = await ctx.db.orders.create({
+      if(ctx.session.user.deposit < price) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Balance is not enough",
+        })
+      }
+
+      await ctx.db.orders.create({
         data: {
           user: {
             connect: {
@@ -47,6 +55,7 @@ export const ordersRouter = createTRPCRouter({
           type: "buy",
           fill,
           symbol,
+          completed: input.isAlreadyCompleted,
         },
       });
 
@@ -64,7 +73,14 @@ export const ordersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { price, fill, symbol } = input;
 
-      const order = await ctx.db.orders.create({
+      if(ctx.session.user.deposit < price) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Balance is not enough",
+        })
+      }
+
+      await ctx.db.orders.create({
         data: {
           user: {
             connect: {
@@ -86,7 +102,7 @@ export const ordersRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         tp: z.number({ message: "tp must be a number" }),
-        sl: z.number({ message: "sl must be a number" }),
+        sl: z.number({ message: "sl must be a number" })
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -155,4 +171,24 @@ export const ordersRouter = createTRPCRouter({
         },
       });
     }),
+
+  completeOrder: protectedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const isUserOrderExist = ctx.session.user.orders.find((order) => order.id === input.id);
+    
+    if (!isUserOrderExist) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Invalid order",
+      });
+    }
+    
+    return await ctx.db.orders.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        completed: true,
+      },
+    });
+  })
 });
