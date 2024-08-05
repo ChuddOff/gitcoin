@@ -1,13 +1,16 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {
+  JsonValue,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime/library";
 import ccxt from "ccxt";
 
 export const coinRouter = createTRPCRouter({
   buy: publicProcedure
     .input(z.object({ cost: z.number(), coin: z.string(), amount: z.number() }))
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const user = ctx.session?.user;
 
       if (!user) {
@@ -25,13 +28,15 @@ export const coinRouter = createTRPCRouter({
         profilePocket.set(input.coin, input.amount);
       }
 
-      ctx.db.user.update({
+      await ctx.db.user.update({
         where: {
           id: user.id,
         },
         data: {
-          deposit: user.deposit - input.cost,
-          pocket: Object.fromEntries(profilePocket),
+          deposit: user.deposit - input.amount,
+          pocket: {
+            push: Object.fromEntries(profilePocket) as unknown as JsonValue[],
+          },
         },
       });
 

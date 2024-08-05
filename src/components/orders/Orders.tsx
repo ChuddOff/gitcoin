@@ -182,9 +182,9 @@ const Orders: React.FC = () => {
               </Table>
               <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-[1s] transition-all">
                 <div
-                  className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all  items-center gap-[5px]"
+                  className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all  items-center gap-[5px] min-w-[70px]"
                   style={{
-                    width: `calc(${response ? percent : 50}% + 55px)`,
+                    width: `calc(${response ? percent : 50}%)`,
                   }}
                 >
                   <div className="transition-[1s] transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
@@ -194,7 +194,12 @@ const Orders: React.FC = () => {
                     {response && percent.toFixed(0) + "%"}
                   </h3>
                 </div>
-                <div className="rounded-[5px] flex w-full bg-[#ffeaea] justify-end w-min-[55px] items-center gap-[5px]">
+                <div
+                  className="rounded-[5px] flex bg-[#ffeaea] justify-end min-w-[70px] items-center gap-[5px]"
+                  style={{
+                    width: `calc(${response ? 100 - percent : 50}%)`,
+                  }}
+                >
                   <h3 className="text-[#ef484d] font-[500] text-[15px]">
                     {response && (100 - percent).toFixed(0) + "%"}
                   </h3>

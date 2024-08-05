@@ -19,27 +19,23 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
+import { Orders } from "@prisma/client";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-const YourOrders: React.FC = () => {
-  const searchParams = useSearchParams();
-  const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
+interface YourOrdersInterface {
+  cost: number;
+  orderData: Omit<Orders, "userId">[];
+  isPending: boolean;
+}
 
-  const typeCoin =
-    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
-    "/USDT";
-
-  const getAll = api.order.getAll.useQuery(undefined, {
-    refetchInterval: 3000,
-  });
-
-  const costs = api.coin.getCosts.useQuery({
-    type: typeCoin,
-  });
-
+const YourOrders: React.FC<YourOrdersInterface> = ({
+  cost,
+  orderData,
+  isPending,
+}) => {
   const updateOrder = api.order.updateOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
@@ -63,7 +59,7 @@ const YourOrders: React.FC = () => {
         radius="sm"
         classNames={{
           th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-          base: "p-[0px] m-[0px] h-[165px] ",
+          base: "p-[0px] m-[0px] h-[150px] ",
           table: "p-[0px] m-[0px] h-[5px] ",
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
@@ -79,8 +75,8 @@ const YourOrders: React.FC = () => {
           <TableColumn>Действия</TableColumn>
         </TableHeader>
         <TableBody
-          isLoading={getAll.isPending}
-          items={getAll.data?.filter((item) => item.completed === false) ?? []}
+          isLoading={isPending}
+          items={orderData.filter((item) => item.completed === false) ?? []}
           loadingContent={<Spinner label="Loading..." />}
         >
           {(item) => (
@@ -115,9 +111,7 @@ const YourOrders: React.FC = () => {
                 )}
               </TableCell>
               <TableCell>{item.orderPrice} USDT</TableCell>
-              <TableCell>
-                {costs.data?.price ?? 0 - item.orderPrice} USDT
-              </TableCell>
+              <TableCell>{cost ?? 0 - item.orderPrice} USDT</TableCell>
               <TableCell>
                 {item.TakeProfit} / {item.StopLoss}
               </TableCell>

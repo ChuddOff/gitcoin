@@ -42,7 +42,6 @@ import TradeHistory from "@/components/userOrders/tradeHistory/TradeHistory";
 export default function Home() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
-
   const typeCoin =
     (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
     "/USDT";
@@ -54,6 +53,15 @@ export default function Home() {
       }
     },
   });
+  const buy = api.coin.buy.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(
+          "Вы успешно преобрели " + typeCoin + " в размере " + fill
+        );
+      }
+    },
+  });
   const sellOrder = api.order.sellOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
@@ -61,15 +69,20 @@ export default function Home() {
       }
     },
   });
-
   const { data: profileData } = useSession();
-
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<number>(0);
+  const [currentPrise, setCurrentPrise] = useState<boolean>(false);
+
+  const getAll = api.order.getAll.useQuery(undefined, {
+    refetchInterval: 3000,
+  });
 
   const costs = api.coin.getCosts.useQuery({
     type: typeCoin,
   });
+
+  console.log(currentPrise);
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -101,12 +114,16 @@ export default function Home() {
               >
                 <Tab
                   key="photos"
-                  title="Текущие ордеры (0)"
+                  title={`Текущие ордеры (${getAll.data?.length ?? 0})`}
                   className="p-[0px] h-full "
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      <YourOrders />
+                      <YourOrders
+                        cost={costs.data?.price || 0}
+                        orderData={getAll.data || []}
+                        isPending={getAll.isPending}
+                      />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -154,13 +171,21 @@ export default function Home() {
               color="success"
               isLoading={buyOrder.isPending}
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
-              onClick={() =>
-                buyOrder.mutate({
-                  price: price,
-                  fill: fill,
-                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-                })
-              }
+              onClick={() => {
+                if (currentPrise) {
+                  buy.mutate({
+                    cost: price,
+                    coin: typeCoin,
+                    amount: fill,
+                  });
+                } else {
+                  buyOrder.mutate({
+                    price: price,
+                    fill: fill,
+                    symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                  });
+                }
+              }}
             >
               Купить
             </Button>
@@ -194,6 +219,7 @@ export default function Home() {
                   onClick={() => {
                     costs.refetch().then(() => {
                       setPrice(costs.data?.price || price);
+                      setCurrentPrise(true);
                     });
                   }}
                   isLoading={costs.isFetching}
@@ -206,13 +232,14 @@ export default function Home() {
             label="Цена Ордера"
             size="sm"
             value={`${price}`}
-            onChange={(e) =>
+            onChange={(e) => {
+              setCurrentPrise(false);
               setPrice(
                 e.target.value.match("^\\d+([,.]\\d+)?$")
                   ? +e.target.value
                   : price
-              )
-            }
+              );
+            }}
           />
           <Input
             classNames={{
