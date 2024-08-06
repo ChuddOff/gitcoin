@@ -2,7 +2,6 @@
 
 import "./page.css";
 import Image from "next/image";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts, { chart } from "highcharts/highstock";
@@ -13,6 +12,7 @@ import {
   ButtonGroup,
   Card,
   CardBody,
+  Chip,
   Input,
   Skeleton,
   Spinner,
@@ -33,99 +33,93 @@ import Chart from "@/components/chart/Chart";
 import Details from "@/components/details/Details";
 import Orders from "@/components/orders/Orders";
 import toast from "react-hot-toast";
-
-interface profileData {
-  _id: string;
-  nick: string;
-  deposit: number;
-  bonus: boolean;
-}
-
-async function getProfileData() {
-  let response = await fetch("/api/profile", {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-}
-async function getCost(type: string) {
-  let response = await fetch("/api/getCost?type=" + type, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-}
-async function putProfileData(cost: number, coin: string, amount: number) {
-  toast.promise(
-    fetch("/api/buy", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cost: cost,
-        coin: coin,
-        amount: amount,
-      }),
-    }),
-    {
-      loading: "Saving...",
-      success: <b>Settings saved!</b>,
-      error: <b>Could not save.</b>,
-    }
-  );
-}
+import { useSession } from "next-auth/react";
+import { api } from "../../trpc/react";
+import YourOrders from "@/components/userOrders/yourOrders/YourOrders";
+import OrdersHistory from "@/components/userOrders/ordersHistory/OrdersHistory";
+import TradeHistory from "@/components/userOrders/tradeHistory/TradeHistory";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
-  const { user } = useUser();
+  const typeCoin =
+    (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
+    "/USDT";
 
-  const [profileCost, setProfileCost] = useState<number>();
-  const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
+  const userDeposit = api.user.getUserDeposit.useQuery();
 
-  const [profileData, setProfileData] = useState<profileData>();
-  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
-
+  const buyOrder = api.order.buyOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success("Ордер успешно создан!");
+        userDeposit.refetch();
+      }
+    },
+  });
+  const buy = api.coin.buy.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(
+          "Вы успешно преобрели " +
+            data.coin +
+            " в размере " +
+            (data.amount / (costs.data?.price ?? 1)).toFixed(4)
+        );
+        userDeposit.refetch();
+      }
+    },
+  });
+  const sellOrder = api.order.sellOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(data.massage);
+        userDeposit.refetch();
+      }
+    },
+  });
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<number>(0);
+  const [currentPrise, setCurrentPrise] = useState<boolean>(false);
 
-  async function fetchProfileData() {
-    setIsLoadingProfile(true);
-    try {
-      const newData = await getProfileData();
-      setProfileData(newData.profile);
-      setIsLoadingProfile(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoadingProfile(false);
-    }
-  }
+  const getAll = api.order.getAll.useQuery(undefined, {
+    refetchInterval: 3000,
+  });
 
-  async function fetchCostData() {
-    setIsLoadingCost(true);
-    try {
-      const newData = await getCost(
-        (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
-          "/USDT"
-      );
-      setPrice(newData.prise);
-      setIsLoadingCost(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoadingCost(false);
-    }
-  }
+  const costs = api.coin.getCosts.useQuery({
+    type: typeCoin,
+  });
+
+  const markAsCompleted = api.order.markAsCompleted.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(
+          "Вы успешно преобрели " +
+            data.symbol +
+            " в размере " +
+            (data.fill / (costs.data?.price ?? 1)).toFixed(4)
+        );
+      }
+    },
+  });
+
+  const ordersNotCompleted = getAll.data?.filter(
+    (order) => order.completed === false
+  );
+  const checkOrders = () => {
+    ordersNotCompleted?.forEach((order) => {
+      console.log(Math.abs(order.orderPrice - (costs.data?.price ?? 0)));
+
+      if (Math.abs(order.orderPrice - (costs.data?.price ?? 0)) < 50) {
+        markAsCompleted.mutate({
+          id: order.id,
+        });
+      }
+    });
+  };
 
   useEffect(() => {
-    if (user?.id) {
-      fetchProfileData();
-    }
-  }, [user?.id]);
+    checkOrders();
+  }, [getAll.data]);
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -157,13 +151,16 @@ export default function Home() {
               >
                 <Tab
                   key="photos"
-                  title="Текущие ордеры (0)"
+                  title={`Текущие ордеры (${ordersNotCompleted?.length ?? 0})`}
                   className="p-[0px] h-full "
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <YourOrders
+                        cost={costs.data?.price || 0}
+                        orderData={getAll.data || []}
+                        isPending={getAll.isPending}
+                      />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -174,8 +171,7 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <OrdersHistory />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -186,8 +182,7 @@ export default function Home() {
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
                     <CardBody className="p-[0px] h-full">
-                      Excepteur sint occaecat cupidatat non proident, sunt in
-                      culpa qui officia deserunt mollit anim id est laborum.
+                      <TradeHistory />
                     </CardBody>
                   </Card>
                 </Tab>
@@ -200,9 +195,9 @@ export default function Home() {
             <h3 className="font-[800] text-[13px] text-black">
               Доступ Баланс:
             </h3>
-            {profileData ? (
+            {userDeposit.data ? (
               <h3 className="font-[800] text-[13px] text-black">
-                {profileData.deposit}
+                {userDeposit.data}
               </h3>
             ) : (
               <Skeleton className="h-3 w-[70px] rounded-lg" />
@@ -211,20 +206,44 @@ export default function Home() {
           <div className="mt-[17px] flex items-center gap-[30px]">
             <Button
               color="success"
+              isLoading={buyOrder.isPending}
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
-              onClick={() =>
-                putProfileData(
-                  fill,
-                  tvwidgetsymbol ?? "BITSTAMP:BTCUSD",
-                  +(fill / price).toFixed(8)
-                )
-              }
+              onClick={() => {
+                if (currentPrise) {
+                  buy.mutate({
+                    cost: price,
+                    coin: typeCoin,
+                    amount: fill,
+                  });
+                  buyOrder.mutate({
+                    price: price,
+                    fill: fill,
+                    symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                    isAlreadyCompleted: true,
+                  });
+                } else {
+                  buyOrder.mutate({
+                    price: price,
+                    fill: fill,
+                    symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                    isAlreadyCompleted: false,
+                  });
+                }
+              }}
             >
               Купить
             </Button>
             <Button
               color="danger"
               className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
+              isLoading={sellOrder.isPending}
+              onClick={() =>
+                sellOrder.mutate({
+                  price: price,
+                  fill: fill,
+                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                })
+              }
             >
               Продать
             </Button>
@@ -241,8 +260,13 @@ export default function Home() {
             endContent={
               <div className="h-full flex items-center justify-center w-[110px] ">
                 <Button
-                  onClick={fetchCostData}
-                  isLoading={isLoadingCost}
+                  onClick={() => {
+                    costs.refetch().then(() => {
+                      setPrice(costs.data?.price || price);
+                      setCurrentPrise(true);
+                    });
+                  }}
+                  isLoading={costs.isFetching}
                   className="text-[#45979f] font-[800] text-[12px] bg-transparent"
                 >
                   Последняя
@@ -252,13 +276,14 @@ export default function Home() {
             label="Цена Ордера"
             size="sm"
             value={`${price}`}
-            onChange={(e) =>
+            onChange={(e) => {
+              setCurrentPrise(false);
               setPrice(
                 e.target.value.match("^\\d+([,.]\\d+)?$")
                   ? +e.target.value
                   : price
-              )
-            }
+              );
+            }}
           />
           <Input
             classNames={{
@@ -291,7 +316,7 @@ export default function Home() {
             <ButtonGroup>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 10))
+                  setFill(Math.floor((userDeposit.data ?? 0) / 10))
                 }
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
@@ -299,9 +324,7 @@ export default function Home() {
                 10%
               </Button>
               <Button
-                onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 4))
-                }
+                onClick={() => setFill(Math.floor((userDeposit.data ?? 0) / 4))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -309,9 +332,7 @@ export default function Home() {
                 25%
               </Button>
               <Button
-                onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) / 2))
-                }
+                onClick={() => setFill(Math.floor((userDeposit.data ?? 0) / 2))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -320,7 +341,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.deposit ?? 0) * 0.75))
+                  setFill(Math.floor((userDeposit.data ?? 0) * 0.75))
                 }
                 color="danger"
                 size="sm"
@@ -329,7 +350,7 @@ export default function Home() {
                 75%
               </Button>
               <Button
-                onClick={() => setFill(Math.floor(profileData?.deposit ?? 0))}
+                onClick={() => setFill(Math.floor(userDeposit.data ?? 0))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-l-[1px] border-black"

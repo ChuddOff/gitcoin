@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import React from "react";
-import { ClerkProvider } from "@clerk/nextjs";
+import React, { Suspense } from "react";
 import { NextUIProvider } from "@nextui-org/react";
 import Header from "@/components/header/Header";
 import Footer from "@/components/footer/Footer";
 import { Toaster } from "react-hot-toast";
+import { TRPCReactProvider } from "../trpc/react";
+import NextAuthProvider from "./provider/NextAuth";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -22,37 +23,41 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
+    <html lang="en">
+      <Suspense>
         <body className={montserrat.className}>
-          <NextUIProvider>
-            <Header />
-            {children}
-            <Footer />
-            <Toaster
-              position="top-center"
-              reverseOrder={false}
-              gutter={8}
-              containerClassName=""
-              containerStyle={{}}
-              toastOptions={{
-                // Define default options
-                className: "",
-                duration: 5000,
-                style: {
-                  background: "#363636",
-                  color: "#fff",
-                },
+          <TRPCReactProvider>
+            <NextAuthProvider>
+              <NextUIProvider>
+                <Header />
+                {children}
+                <Footer />
+                <Toaster
+                  position="top-center"
+                  reverseOrder={false}
+                  gutter={8}
+                  containerClassName=""
+                  containerStyle={{}}
+                  toastOptions={{
+                    // Define default options
+                    className: "",
+                    duration: 5000,
+                    style: {
+                      background: "#363636",
+                      color: "#fff",
+                    },
 
-                // Default options for specific types
-                success: {
-                  duration: 3000,
-                },
-              }}
-            />
-          </NextUIProvider>
+                    // Default options for specific types
+                    success: {
+                      duration: 3000,
+                    },
+                  }}
+                />
+              </NextUIProvider>
+            </NextAuthProvider>
+          </TRPCReactProvider>
         </body>
-      </html>
-    </ClerkProvider>
+      </Suspense>
+    </html>
   );
 }

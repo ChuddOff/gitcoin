@@ -11,21 +11,12 @@ import {
 } from "@nextui-org/react";
 import Search from "../search/Search";
 import Image from "next/image";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-  UserButton,
-  useSignUp,
-} from "@clerk/nextjs";
-import { useUser } from "@clerk/nextjs";
 import { redirect, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
-  const { user } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { isSignedIn, isLoaded } = useAuth();
 
   const [input, setInput] = useState<string>("");
 
@@ -94,25 +85,23 @@ const Header = () => {
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <SignedOut>
-            <SignInButton>
+          {session?.user ? (
+            <div className=" flex items-center gap-2">
               <Image
-                className="cursor-pointer"
-                src="/user.svg"
-                alt="logo"
+                src={session?.user.image as string}
+                alt="profile"
                 width={32}
                 height={32}
+                className="cursor-pointer rounded-full"
               />
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <div className={"flex gap-3"}>
-              <UserButton />
-              <Link className={"text-violet uppercase"} href="/profile">
-                {user?.username}
-              </Link>
+              <div>
+                <p className=" text-sm font-medium">{session?.user.name}</p>
+                <p className=" text-xs font-medium">{session?.user.email}</p>
+              </div>
             </div>
-          </SignedIn>
+          ) : (
+            <Link href={"/login"}>Login</Link>
+          )}
         </NavbarItem>
       </NavbarContent>
     </Navbar>
