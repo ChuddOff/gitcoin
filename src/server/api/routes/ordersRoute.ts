@@ -35,14 +35,25 @@ export const ordersRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+
       const { price, fill, symbol } = input;
 
-      if(ctx.session.user.deposit < price) {
+      if (ctx.session.user.deposit < fill) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Balance is not enough",
-        })
+        });
       }
+
+      await ctx.db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          deposit: user.deposit - input.fill,
+        },
+      });
 
       await ctx.db.orders.create({
         data: {
@@ -71,14 +82,36 @@ export const ordersRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+
       const { price, fill, symbol } = input;
 
-      if(ctx.session.user.deposit < price) {
+      if (ctx.session.user.deposit < price) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Balance is not enough",
-        })
+        });
       }
+
+      const profilePocket = new Map(Object.entries(user.pocket));
+
+      if (profilePocket.has(input.symbol)) {
+        profilePocket.set(
+          input.symbol,
+          ((profilePocket.get(input.symbol) as number) ?? 0) - input.fill
+        );
+      } else {
+        profilePocket.set(input.symbol, input.fill);
+      }
+
+      await ctx.db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          pocket: Object.fromEntries(profilePocket),
+        },
+      });
 
       await ctx.db.orders.create({
         data: {
@@ -102,7 +135,7 @@ export const ordersRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         tp: z.number({ message: "tp must be a number" }),
-        sl: z.number({ message: "sl must be a number" })
+        sl: z.number({ message: "sl must be a number" }),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -155,40 +188,26 @@ export const ordersRouter = createTRPCRouter({
     }),
 
   markAsCompleted: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      })
-    )
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id } = input;
+      const isUserOrderExist = ctx.session.user.orders.find(
+        (order) => order.id === input.id
+      );
+
+      if (!isUserOrderExist) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid order",
+        });
+      }
+
       return await ctx.db.orders.update({
         where: {
-          id,
+          id: input.id,
         },
         data: {
           completed: true,
         },
       });
     }),
-
-  completeOrder: protectedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
-    const isUserOrderExist = ctx.session.user.orders.find((order) => order.id === input.id);
-    
-    if (!isUserOrderExist) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Invalid order",
-      });
-    }
-    
-    return await ctx.db.orders.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        completed: true,
-      },
-    });
-  })
 });

@@ -46,10 +46,13 @@ export default function Home() {
     (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
     "/USDT";
 
+  const userDeposit = api.user.getUserDeposit.useQuery();
+
   const buyOrder = api.order.buyOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
-        toast.success(data.massage);
+        toast.success("Ордер успешно создан!");
+        userDeposit.refetch();
       }
     },
   });
@@ -57,8 +60,12 @@ export default function Home() {
     onSuccess: (data) => {
       if (data) {
         toast.success(
-          "Вы успешно преобрели " + typeCoin + " в размере " + fill
+          "Вы успешно преобрели " +
+            data.coin +
+            " в размере " +
+            (data.amount / (costs.data?.price ?? 1)).toFixed(4)
         );
+        userDeposit.refetch();
       }
     },
   });
@@ -66,10 +73,10 @@ export default function Home() {
     onSuccess: (data) => {
       if (data) {
         toast.success(data.massage);
+        userDeposit.refetch();
       }
     },
   });
-  const { data: profileData } = useSession();
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<number>(0);
   const [currentPrise, setCurrentPrise] = useState<boolean>(false);
@@ -82,7 +89,37 @@ export default function Home() {
     type: typeCoin,
   });
 
-  console.log(currentPrise);
+  const markAsCompleted = api.order.markAsCompleted.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(
+          "Вы успешно преобрели " +
+            data.symbol +
+            " в размере " +
+            (data.fill / (costs.data?.price ?? 1)).toFixed(4)
+        );
+      }
+    },
+  });
+
+  const ordersNotCompleted = getAll.data?.filter(
+    (order) => order.completed === false
+  );
+  const checkOrders = () => {
+    ordersNotCompleted?.forEach((order) => {
+      console.log(Math.abs(order.orderPrice - (costs.data?.price ?? 0)));
+
+      if (Math.abs(order.orderPrice - (costs.data?.price ?? 0)) < 50) {
+        markAsCompleted.mutate({
+          id: order.id,
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    checkOrders();
+  }, [getAll.data]);
 
   return (
     <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
@@ -114,7 +151,7 @@ export default function Home() {
               >
                 <Tab
                   key="photos"
-                  title={`Текущие ордеры (${getAll.data?.length ?? 0})`}
+                  title={`Текущие ордеры (${ordersNotCompleted?.length ?? 0})`}
                   className="p-[0px] h-full "
                 >
                   <Card className="rounded-[0px] p-[0px] h-full rounded-[5px]">
@@ -158,9 +195,9 @@ export default function Home() {
             <h3 className="font-[800] text-[13px] text-black">
               Доступ Баланс:
             </h3>
-            {profileData?.user ? (
+            {userDeposit.data ? (
               <h3 className="font-[800] text-[13px] text-black">
-                {profileData.user.deposit}
+                {userDeposit.data}
               </h3>
             ) : (
               <Skeleton className="h-3 w-[70px] rounded-lg" />
@@ -178,11 +215,18 @@ export default function Home() {
                     coin: typeCoin,
                     amount: fill,
                   });
+                  buyOrder.mutate({
+                    price: price,
+                    fill: fill,
+                    symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                    isAlreadyCompleted: true,
+                  });
                 } else {
                   buyOrder.mutate({
                     price: price,
                     fill: fill,
                     symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                    isAlreadyCompleted: false,
                   });
                 }
               }}
@@ -272,7 +316,7 @@ export default function Home() {
             <ButtonGroup>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 10))
+                  setFill(Math.floor((userDeposit.data ?? 0) / 10))
                 }
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
@@ -280,9 +324,7 @@ export default function Home() {
                 10%
               </Button>
               <Button
-                onClick={() =>
-                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 4))
-                }
+                onClick={() => setFill(Math.floor((userDeposit.data ?? 0) / 4))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -290,9 +332,7 @@ export default function Home() {
                 25%
               </Button>
               <Button
-                onClick={() =>
-                  setFill(Math.floor((profileData?.user.deposit ?? 0) / 2))
-                }
+                onClick={() => setFill(Math.floor((userDeposit.data ?? 0) / 2))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-x-[1px] border-black"
@@ -301,7 +341,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() =>
-                  setFill(Math.floor((profileData?.user.deposit ?? 0) * 0.75))
+                  setFill(Math.floor((userDeposit.data ?? 0) * 0.75))
                 }
                 color="danger"
                 size="sm"
@@ -310,9 +350,7 @@ export default function Home() {
                 75%
               </Button>
               <Button
-                onClick={() =>
-                  setFill(Math.floor(profileData?.user.deposit ?? 0))
-                }
+                onClick={() => setFill(Math.floor(userDeposit.data ?? 0))}
                 color="danger"
                 size="sm"
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-l-[1px] border-black"

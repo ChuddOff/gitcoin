@@ -36,14 +36,13 @@ export const coinRouter = createTRPCRouter({
           id: user.id,
         },
         data: {
-          deposit: user.deposit - input.amount,
           pocket: {
             push: Object.fromEntries(profilePocket) as unknown as JsonValue[],
           },
         },
       });
 
-      return { success: true };
+      return { success: true, coin: input.coin, amount: input.amount };
     }),
 
   sell: protectedProcedure
@@ -51,24 +50,12 @@ export const coinRouter = createTRPCRouter({
     .query(({ ctx, input }) => {
       const { user } = ctx.session;
 
-      const profilePocket = new Map(Object.entries(user.pocket));
-
-      if (profilePocket.has(input.coin)) {
-        profilePocket.set(
-          input.coin,
-          ((profilePocket.get(input.coin) as number) ?? 0) - input.amount
-        );
-      } else {
-        profilePocket.set(input.coin, input.amount);
-      }
-
       ctx.db.user.update({
         where: {
           id: user.id,
         },
         data: {
-          deposit: user.deposit - input.cost,
-          pocket: Object.fromEntries(profilePocket),
+          deposit: user.deposit + input.cost,
         },
       });
     }),

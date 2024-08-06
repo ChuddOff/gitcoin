@@ -149,7 +149,11 @@ const YourOrders: React.FC<YourOrdersInterface> = ({
                   type="number"
                   variant="bordered"
                   className="text-black"
-                  onChange={(e) => setTP(Number(e.target.value))}
+                  onChange={(e) =>
+                    Number(e.target.value) > SL || SL === 0
+                      ? setTP(Number(e.target.value))
+                      : TP
+                  }
                   value={TP?.toString()}
                 />
                 <Input
@@ -157,7 +161,11 @@ const YourOrders: React.FC<YourOrdersInterface> = ({
                   type="number"
                   variant="bordered"
                   className="text-black"
-                  onChange={(e) => setSL(Number(e.target.value))}
+                  onChange={(e) =>
+                    Number(e.target.value) < TP || TP === 0
+                      ? setSL(Number(e.target.value))
+                      : SL
+                  }
                   value={SL?.toString()}
                 />
                 <div className="flex py-2 px-1 justify-between"></div>
