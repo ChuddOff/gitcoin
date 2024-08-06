@@ -1,12 +1,12 @@
 import { getServerAuthSession } from "../../../server/auth";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import LoginForm from "../../../components/(auth)/login/LoginForm";
 
 export default async function Login() {
   const session = await getServerAuthSession();
 
   if (session?.user) {
-    return notFound();
+    return redirect("/exchange");
   }
 
   return <LoginForm />;
