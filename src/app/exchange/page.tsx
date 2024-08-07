@@ -35,7 +35,6 @@ export default function Home() {
             (data.fill / (costs.data?.price ?? 1)).toFixed(4)
         );
 
-        // replace it?
         refetchOrders();
       }
     },
@@ -55,6 +54,9 @@ export default function Home() {
           id: order.id,
         });
       }
+
+      // #1e2329 cards color
+      // #181a20
     });
   };
 
