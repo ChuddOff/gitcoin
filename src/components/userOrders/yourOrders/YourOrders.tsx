@@ -20,9 +20,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { Orders } from "@prisma/client";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 interface YourOrdersInterface {
@@ -31,22 +29,19 @@ interface YourOrdersInterface {
   isPending: boolean;
 }
 
-const YourOrders: React.FC<YourOrdersInterface> = ({
+const YourOrders = ({
   cost,
   orderData,
   isPending,
-}) => {
+}: YourOrdersInterface) => {
   const updateOrder = api.order.updateOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
-        console.log(data);
-
         toast.success("TP и SL успешно изменены!");
       }
     },
   });
 
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [currentOrder, setCurrentOrder] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [TP, setTP] = useState<number>(0);
