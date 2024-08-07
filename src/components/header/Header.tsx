@@ -9,8 +9,6 @@ import {
 } from "@nextui-org/react";
 import Search from "../search/Search";
 import Image from "next/image";
-import { redirect, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import UserInfo from "./UserInfo";
 import { Session } from "next-auth";
 
@@ -19,16 +17,6 @@ interface Props {
 }
 
 const Header = ({ session }: Props) => {
-  const router = useRouter();
-
-  const [input, setInput] = useState<string>("");
-
-  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      router.push(`/exchange/${input}`);
-    }
-  };
-
   return (
     <Navbar isBordered={true} className="select-none bg-white">
       <NavbarBrand>

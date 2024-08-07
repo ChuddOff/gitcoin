@@ -24,23 +24,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-        <body className={montserrat.className}>
-          <TRPCReactProvider>
-            <NextAuthProvider>
-              <NextUIProvider>
-                <HeaderWrapper />
-                {children}
-                <Footer />
-                <Toaster
-                  position="top-center"
-                  reverseOrder={false}
-                  gutter={8}
-                  containerClassName=""
-                />
-              </NextUIProvider>
-            </NextAuthProvider>
-          </TRPCReactProvider>
-        </body>
+      <body className={montserrat.className}>
+        <TRPCReactProvider>
+          <NextAuthProvider>
+            <NextUIProvider>
+              <HeaderWrapper />
+              {children}
+              <Footer />
+              <Toaster
+                position="top-center"
+                reverseOrder={false}
+                gutter={8}
+                containerClassName=""
+              />
+            </NextUIProvider>
+          </NextAuthProvider>
+        </TRPCReactProvider>
+      </body>
     </html>
   );
 }

@@ -12,8 +12,10 @@ const Search: React.FC = () => {
 
   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      console.log(2323);
-      router.push(`/exchange/${input}`);
+      router.push(
+        `/exchange?tvwidgetsymbol=BITSTAMP%3A${input.toUpperCase()}USD`
+      );
+      window.location.reload();
     }
   };
 
@@ -33,10 +35,10 @@ const Search: React.FC = () => {
             <Image src="search.svg" alt="search" width={12} height={12} />
           </div>
         }
-        label="Search"
+        label="Search (BTC, ETH)"
         size="sm"
         type="search"
-        onChange={(e) => input(e.target.value)}
+        onChange={(e) => setInput(e.target.value)}
       />
     </div>
   );

@@ -1,10 +1,11 @@
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 const Chart: React.FC = () => {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
+
+  console.log(tvwidgetsymbol);
 
   const chart = useRef<HTMLDivElement>(null);
 
@@ -31,7 +32,7 @@ const Chart: React.FC = () => {
     if (chart.current!.children.length === 1) {
       chart.current!.appendChild(chartscript);
     }
-  }, [chart]);
+  }, [chart, tvwidgetsymbol]);
 
   return (
     <div
