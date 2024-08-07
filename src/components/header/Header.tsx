@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Input,
@@ -13,37 +11,10 @@ import Search from "../search/Search";
 import Image from "next/image";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { getServerAuthSession } from "@/server/auth";
 
-const Header = () => {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  const [input, setInput] = useState<string>("");
-
-  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      console.log(2323);
-      router.push(`/exchange/${input}`);
-    }
-  };
-
-  // useEffect(() => {
-  //   if (isSignedIn) {
-  //     fetch("/api/profile", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         _id: user?.id || "",
-  //         nick: user?.username || "",
-  //         deposit: 10000,
-  //         bonus: true,
-  //         pocket: [],
-  //       }),
-  //     });
-  //   }
-  // }, [isSignedIn]);
+const Header = async () => {
+  const session = await getServerAuthSession();
 
   return (
     <Navbar isBordered={true} className="select-none bg-white">
@@ -55,9 +26,7 @@ const Header = () => {
 
       <NavbarContent as="div" className="sm:flex" justify="center">
         <NavbarItem className="w-full flex justify-center items-center">
-          <div onKeyDown={onKeyPress} className="w-[430px]">
-            <Search input={setInput} />
-          </div>
+          <Search />
         </NavbarItem>
       </NavbarContent>
 

@@ -4,7 +4,7 @@ import {
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
+import { JsonValue, type Adapter } from "next-auth/adapters";
 import type { JWT } from "next-auth/jwt";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
@@ -43,7 +43,7 @@ declare module "next-auth/jwt" {
     image: string;
     deposit: number;
     bonus: boolean;
-    pocket: Object[];
+    pocket: JsonValue[];
     orders: Orders[];
   }
 }
@@ -78,6 +78,32 @@ export const authOptions: NextAuthOptions = {
           orders: true,
         },
       });
+      if (!dbuser) {
+        const dbUser = await db.user.create({
+          data: {
+            name: token.name,
+            email: token.email,
+            image: token.image as string,
+            deposit: token.deposit,
+            bonus: token.bonus,
+            pocket: [],
+            orders: undefined,
+          },
+          select: {
+            name: true,
+            email: true,
+            image: true,
+            deposit: true,
+            bonus: true,
+            pocket: true,
+            orders: true,
+          },
+        });
+        return {
+          ...dbUser,
+          sub: token.sub,
+        };
+      }
 
       // return to session default token and role, likedPosts
       return {
@@ -85,7 +111,7 @@ export const authOptions: NextAuthOptions = {
         name: dbuser!.name,
         email: dbuser!.email,
         image: dbuser!.image,
-        pocket: dbuser!.pocket as Object[],
+        pocket: dbuser!.pocket as JsonValue[],
         deposit: dbuser!.deposit,
         bonus: dbuser!.bonus,
         orders: dbuser!.orders,
@@ -131,7 +157,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
 
-        if(!credentials?.username || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           throw new Error("No credentials provided");
         }
 
@@ -139,7 +165,7 @@ export const authOptions: NextAuthOptions = {
           LoginSchema.parse(credentials);
         } catch (error) {
           if (error instanceof z.ZodError) {
-            throw new Error(error.errors[0].message)
+            throw new Error(error.errors[0].message);
           }
         }
         const user = await db.user.findFirst({
@@ -152,7 +178,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // means user trying login to discord account
-        if(!user.password) {
+        if (!user.password) {
           throw new Error("Invalid credentials");
         }
 
