@@ -20,8 +20,6 @@ const OrdersHistory: React.FC = () => {
     refetchInterval: 3000,
   });
 
-  console.log(getAll.data);
-
   //   const [state, setState] = useState<number>(0);
 
   //   const text = useRef<HTMLDivElement>(null);
