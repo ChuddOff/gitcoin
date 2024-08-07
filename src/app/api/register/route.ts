@@ -12,7 +12,6 @@ export async function POST(req: Request) {
     registerSchema.parse({ username, email, password });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.log(error);
 
       return NextResponse.json(
         {

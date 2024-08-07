@@ -11,10 +11,23 @@ import Search from "../search/Search";
 import Image from "next/image";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { getServerAuthSession } from "@/server/auth";
+import UserInfo from "./UserInfo";
+import { Session } from "next-auth";
 
-const Header = async () => {
-  const session = await getServerAuthSession();
+interface Props {
+  session: Session | null;
+}
+
+const Header = ({ session }: Props) => {
+  const router = useRouter();
+
+  const [input, setInput] = useState<string>("");
+
+  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      router.push(`/exchange/${input}`);
+    }
+  };
 
   return (
     <Navbar isBordered={true} className="select-none bg-white">
@@ -55,21 +68,9 @@ const Header = async () => {
         </NavbarItem>
         <NavbarItem>
           {session?.user ? (
-            <div className=" flex items-center gap-2">
-              <Image
-                src={session?.user.image as string}
-                alt="profile"
-                width={32}
-                height={32}
-                className="cursor-pointer rounded-full"
-              />
-              <div>
-                <p className=" text-sm font-medium">{session?.user.name}</p>
-                <p className=" text-xs font-medium">{session?.user.email}</p>
-              </div>
-            </div>
+            <UserInfo session={session} />
           ) : (
-            <Link href={"/login"}>Login</Link>
+            <Link href="/login">Login</Link>
           )}
         </NavbarItem>
       </NavbarContent>

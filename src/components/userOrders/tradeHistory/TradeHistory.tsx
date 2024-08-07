@@ -12,28 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 const TradeHistory: React.FC = () => {
   const getAll = api.order.getAll.useQuery(undefined, {
     refetchInterval: 3000,
   });
-
-  console.log(getAll.data);
-
-  //   const [state, setState] = useState<number>(0);
-
-  //   const text = useRef<HTMLDivElement>(null);
-
-  //   const switchText = () => {
-  //     setState((state) => (state % text.current!.childElementCount) + 1);
-  //   };
-
-  //   useEffect(() => {
-  //     const interval = setInterval(switchText, 20000);
-  //     return () => clearInterval(interval);
-  //   }, []);
 
   return (
     <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">

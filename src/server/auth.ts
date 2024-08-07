@@ -29,7 +29,7 @@ declare module "next-auth" {
       // ...other properties
       deposit: number;
       bonus: boolean;
-      pocket: Object[];
+      pocket: JsonValue[];
       orders: Orders[];
     } & DefaultSession["user"];
   }
@@ -111,7 +111,7 @@ export const authOptions: NextAuthOptions = {
         name: dbuser!.name,
         email: dbuser!.email,
         image: dbuser!.image,
-        pocket: dbuser!.pocket as JsonValue[],
+        pocket: dbuser!.pocket,
         deposit: dbuser!.deposit,
         bonus: dbuser!.bonus,
         orders: dbuser!.orders,
@@ -127,7 +127,7 @@ export const authOptions: NextAuthOptions = {
           image: token.image as string,
           deposit: token.deposit,
           bonus: token.bonus,
-          pocket: token.pocket as Object[],
+          pocket: token.pocket,
           orders: token.orders,
         },
       };
@@ -168,11 +168,13 @@ export const authOptions: NextAuthOptions = {
             throw new Error(error.errors[0].message);
           }
         }
+
         const user = await db.user.findFirst({
           where: {
             name: credentials?.username,
           },
         });
+
         if (!user) {
           throw new Error("No user provided");
         }

@@ -11,12 +11,11 @@ import {
   TableRow,
   Tabs,
 } from "@nextui-org/react";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 import { api } from "../../trpc/react";
 
-const Orders: React.FC = () => {
+export default function OrdersInfo () {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
 
@@ -73,8 +72,8 @@ const Orders: React.FC = () => {
           title="Книга ордеров"
           className=" h-full p-0 bg-white"
         >
-          <Card className="rounded-[0px] p-[0px] h-full rounded-[5px] bg-white">
-            <CardBody className="p-[0px] h-full bg-white border-[0px] p-[0px]">
+          <Card className="p-[0px] h-full rounded-[5px] bg-white">
+            <CardBody className="h-full bg-white border-[0px] p-[0px]">
               <Table
                 aria-label="Example static collection table"
                 radius="sm"
@@ -180,14 +179,14 @@ const Orders: React.FC = () => {
                   )}
                 </TableBody>
               </Table>
-              <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-[1s] transition-all">
+              <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-all">
                 <div
-                  className="rounded-[5px] flex bg-[#e7f5ee] transition-[1s] transition-all  items-center gap-[5px] min-w-[70px]"
+                  className="rounded-[5px] flex bg-[#e7f5ee] transition-all  items-center gap-[5px] min-w-[70px]"
                   style={{
                     width: `calc(${response ? percent : 50}%)`,
                   }}
                 >
-                  <div className="transition-[1s] transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
+                  <div className="transition-d transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
                     B
                   </div>
                   <h3 className="text-[#45be84] font-[500] text-[15px]">
@@ -215,5 +214,3 @@ const Orders: React.FC = () => {
     </div>
   );
 };
-
-export default Orders;

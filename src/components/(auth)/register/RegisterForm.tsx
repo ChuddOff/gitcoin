@@ -4,7 +4,7 @@ import { registerSchema } from "@/schemas/register";
 import { useMutation } from "@tanstack/react-query";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -61,7 +61,6 @@ export default function LoginForm() {
         registerSchema.parse({ username, password, email });
     } catch (error) {
         if (error instanceof z.ZodError) {
-          console.log(error)
             error.issues.forEach((issue) => {
                 if (issue.path[0] === "username") {
                     setUsernameError(issue.message);

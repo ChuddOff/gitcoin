@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import React, { Suspense } from "react";
+import React from "react";
 import { NextUIProvider } from "@nextui-org/react";
-import Header from "@/components/header/Header";
 import Footer from "@/components/footer/Footer";
 import { Toaster } from "react-hot-toast";
 import { TRPCReactProvider } from "../trpc/react";
 import NextAuthProvider from "./provider/NextAuth";
+import HeaderWrapper from "@/components/header/HeaderWrapper";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -24,12 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Suspense>
         <body className={montserrat.className}>
           <TRPCReactProvider>
             <NextAuthProvider>
               <NextUIProvider>
-                <Header />
+                <HeaderWrapper />
                 {children}
                 <Footer />
                 <Toaster
@@ -37,27 +36,11 @@ export default function RootLayout({
                   reverseOrder={false}
                   gutter={8}
                   containerClassName=""
-                  containerStyle={{}}
-                  toastOptions={{
-                    // Define default options
-                    className: "",
-                    duration: 5000,
-                    style: {
-                      background: "#363636",
-                      color: "#fff",
-                    },
-
-                    // Default options for specific types
-                    success: {
-                      duration: 3000,
-                    },
-                  }}
                 />
               </NextUIProvider>
             </NextAuthProvider>
           </TRPCReactProvider>
         </body>
-      </Suspense>
     </html>
   );
 }
