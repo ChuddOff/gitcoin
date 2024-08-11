@@ -15,7 +15,7 @@ import { useSearchParams } from "next/navigation";
 import React from "react";
 import { api } from "../../trpc/react";
 
-export default function OrdersInfo () {
+export default function OrdersInfo() {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
 
@@ -179,7 +179,7 @@ export default function OrdersInfo () {
                   )}
                 </TableBody>
               </Table>
-              <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-all">
+              <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-all w-full">
                 <div
                   className="rounded-[5px] flex bg-[#e7f5ee] transition-all  items-center gap-[5px] min-w-[70px]"
                   style={{
@@ -194,7 +194,7 @@ export default function OrdersInfo () {
                   </h3>
                 </div>
                 <div
-                  className="rounded-[5px] flex bg-[#ffeaea] justify-end min-w-[70px] items-center gap-[5px]"
+                  className="rounded-[5px] flex bg-[#ffeaea] justify-end min-w-[70px] items-center gap-[5px] "
                   style={{
                     width: `calc(${response ? 100 - percent : 50}%)`,
                   }}
@@ -213,4 +213,4 @@ export default function OrdersInfo () {
       </Tabs>
     </div>
   );
-};
+}

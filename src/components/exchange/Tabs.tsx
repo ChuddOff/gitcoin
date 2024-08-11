@@ -54,14 +54,22 @@ export default function BottomTabs({ orders }: Props) {
           <Tab key="music" title="История ордеров" className="p-[0px] h-full">
             <Card className="p-[0px] h-full rounded-[5px]">
               <CardBody className="p-[0px] h-full">
-                <OrdersHistory />
+                <OrdersHistory
+                  cost={costs.data?.price || 0}
+                  orderData={getAll.data || []}
+                  isPending={getAll.isPending}
+                />
               </CardBody>
             </Card>
           </Tab>
           <Tab key="videos" title="История торговли" className="p-[0px] h-full">
             <Card className="p-[0px] h-full rounded-[5px]">
               <CardBody className="p-[0px] h-full">
-                <TradeHistory />
+                <TradeHistory
+                  cost={costs.data?.price || 0}
+                  orderData={getAll.data || []}
+                  isPending={getAll.isPending}
+                />
               </CardBody>
             </Card>
           </Tab>

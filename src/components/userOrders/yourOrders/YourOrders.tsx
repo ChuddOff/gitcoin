@@ -29,11 +29,7 @@ interface YourOrdersInterface {
   isPending: boolean;
 }
 
-const YourOrders = ({
-  cost,
-  orderData,
-  isPending,
-}: YourOrdersInterface) => {
+const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
   const updateOrder = api.order.updateOrder.useMutation({
     onSuccess: (data) => {
       if (data) {
@@ -52,6 +48,7 @@ const YourOrders = ({
       <Table
         aria-label="Example static collection table"
         radius="sm"
+        isHeaderSticky={true}
         classNames={{
           th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
           base: "p-[0px] m-[0px] h-[150px] ",

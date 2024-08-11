@@ -4,6 +4,12 @@ import { api } from "@/trpc/react";
 import {
   Button,
   Chip,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Spinner,
   Table,
   TableBody,
@@ -11,12 +17,25 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from "@nextui-org/react";
-import React from "react";
+import { Orders } from "@prisma/client";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
 
-const TradeHistory: React.FC = () => {
-  const getAll = api.order.getAll.useQuery(undefined, {
-    refetchInterval: 3000,
+interface YourOrdersInterface {
+  cost: number;
+  orderData: Omit<Orders, "userId">[];
+  isPending: boolean;
+}
+
+const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
+  const updateOrder = api.order.updateOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success("TP и SL успешно изменены!");
+      }
+    },
   });
 
   return (
@@ -24,14 +43,16 @@ const TradeHistory: React.FC = () => {
       <Table
         aria-label="Example static collection table"
         radius="sm"
+        isHeaderSticky={true}
+        fullWidth={false}
         classNames={{
           th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-          base: "p-[0px] m-[0px] h-[165px] ",
-          table: "p-[0px] m-[0px] h-[5px] ",
+          base: "p-[0px] m-[0px] h-[150px]",
+          table: "p-[0px] m-[0px] h-[5px]",
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
           wrapper: "p-[0px] m-[0px] h-full bg-white",
-          td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
+          td: "py-[4px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
         }}
       >
         <TableHeader>
@@ -39,11 +60,10 @@ const TradeHistory: React.FC = () => {
           <TableColumn>Цена оредера</TableColumn>
           <TableColumn>Маржа</TableColumn>
           <TableColumn>TP/SL</TableColumn>
-          <TableColumn>Действия</TableColumn>
         </TableHeader>
         <TableBody
-          isLoading={getAll.isPending}
-          items={getAll.data?.filter((item) => item.completed === true) ?? []}
+          isLoading={isPending}
+          items={orderData.filter((item) => item.completed === true) ?? []}
           loadingContent={<Spinner label="Loading..." />}
         >
           {(item) => (
@@ -78,15 +98,9 @@ const TradeHistory: React.FC = () => {
                 )}
               </TableCell>
               <TableCell>{item.orderPrice} USDT</TableCell>
-              <TableCell>{item.fill} USDT</TableCell>
+              <TableCell>{cost ?? 0 - item.orderPrice} USDT</TableCell>
               <TableCell>
                 {item.TakeProfit} / {item.StopLoss}
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-[9px]">
-                  <Button>Установить TP/SL</Button>
-                  <Button>Закрыть по рс</Button>
-                </div>
               </TableCell>
             </TableRow>
           )}
@@ -96,4 +110,4 @@ const TradeHistory: React.FC = () => {
   );
 };
 
-export default TradeHistory;
+export default YourOrders;

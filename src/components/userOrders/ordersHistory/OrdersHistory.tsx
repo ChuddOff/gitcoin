@@ -4,6 +4,12 @@ import { api } from "@/trpc/react";
 import {
   Button,
   Chip,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Spinner,
   Table,
   TableBody,
@@ -11,36 +17,41 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from "@nextui-org/react";
-import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import { Orders } from "@prisma/client";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
 
-const OrdersHistory: React.FC = () => {
-  const getAll = api.order.getAll.useQuery(undefined, {
-    refetchInterval: 3000,
+interface YourOrdersInterface {
+  cost: number;
+  orderData: Omit<Orders, "userId">[];
+  isPending: boolean;
+}
+
+const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
+  const updateOrder = api.order.updateOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success("TP и SL успешно изменены!");
+      }
+    },
   });
 
-  //   const [state, setState] = useState<number>(0);
-
-  //   const text = useRef<HTMLDivElement>(null);
-
-  //   const switchText = () => {
-  //     setState((state) => (state % text.current!.childElementCount) + 1);
-  //   };
-
-  //   useEffect(() => {
-  //     const interval = setInterval(switchText, 20000);
-  //     return () => clearInterval(interval);
-  //   }, []);
+  const [currentOrder, setCurrentOrder] = useState<string>("");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [TP, setTP] = useState<number>(0);
+  const [SL, setSL] = useState<number>(0);
 
   return (
     <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
       <Table
         aria-label="Example static collection table"
         radius="sm"
+        isHeaderSticky={true}
         classNames={{
           th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-          base: "p-[0px] m-[0px] h-[165px] ",
+          base: "p-[0px] m-[0px] h-[150px] ",
           table: "p-[0px] m-[0px] h-[5px] ",
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
@@ -56,8 +67,8 @@ const OrdersHistory: React.FC = () => {
           <TableColumn>Действия</TableColumn>
         </TableHeader>
         <TableBody
-          isLoading={getAll.isPending}
-          items={getAll.data ?? []}
+          isLoading={isPending}
+          items={orderData ?? []}
           loadingContent={<Spinner label="Loading..." />}
         >
           {(item) => (
@@ -92,22 +103,87 @@ const OrdersHistory: React.FC = () => {
                 )}
               </TableCell>
               <TableCell>{item.orderPrice} USDT</TableCell>
-              <TableCell>{item.fill} USDT</TableCell>
+              <TableCell>{cost ?? 0 - item.orderPrice} USDT</TableCell>
               <TableCell>
                 {item.TakeProfit} / {item.StopLoss}
               </TableCell>
               <TableCell>
                 <div className="flex gap-[9px]">
-                  <Button>Установить TP/SL</Button>
-                  <Button>Закрыть по рс</Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setCurrentOrder(item.id);
+                      setTP(item.TakeProfit);
+                      setSL(item.StopLoss);
+                      onOpen();
+                    }}
+                  >
+                    Установить TP/SL
+                  </Button>
+                  <Button size="sm">Закрыть по рс</Button>
                 </div>
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 text-black">
+                Укажите TP и SL <br /> (Значение 0 - не установливать)
+              </ModalHeader>
+              <ModalBody>
+                <Input
+                  autoFocus
+                  label="TP"
+                  type="number"
+                  variant="bordered"
+                  className="text-black"
+                  onChange={(e) =>
+                    Number(e.target.value) > SL || SL === 0
+                      ? setTP(Number(e.target.value))
+                      : TP
+                  }
+                  value={TP?.toString()}
+                />
+                <Input
+                  label="SL"
+                  type="number"
+                  variant="bordered"
+                  className="text-black"
+                  onChange={(e) =>
+                    Number(e.target.value) < TP || TP === 0
+                      ? setSL(Number(e.target.value))
+                      : SL
+                  }
+                  value={SL?.toString()}
+                />
+                <div className="flex py-2 px-1 justify-between"></div>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  isLoading={updateOrder.isPending}
+                  color="primary"
+                  onPress={() => {
+                    updateOrder.mutate({
+                      id: currentOrder,
+                      tp: TP ?? 0,
+                      sl: SL ?? 0,
+                    });
+                    onClose();
+                  }}
+                >
+                  Подтвердить
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
 
-export default OrdersHistory;
+export default YourOrders;

@@ -1,10 +1,18 @@
-import { Button, ButtonGroup, Input, Skeleton } from "@nextui-org/react";
+import {
+  Button,
+  ButtonGroup,
+  Input,
+  Select,
+  SelectItem,
+  Skeleton,
+} from "@nextui-org/react";
 import OrdersInfo from "../orders/Orders";
 import { api } from "@/trpc/react";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { Session } from "next-auth";
+import { number } from "zod";
 
 interface Props {
   onButtonClick: () => void;
@@ -18,7 +26,7 @@ export default function RightMenu({ onButtonClick, session }: Props) {
     (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
     "/USDT";
   const isValueIntOrFloat = (value: string) => {
-    return value.match("^\\d+([,.]\\d+)?$");
+    return !Number.isNaN(Number(value));
   };
 
   const fillButtons = [
@@ -30,7 +38,8 @@ export default function RightMenu({ onButtonClick, session }: Props) {
   ];
 
   const [price, setPrice] = useState<number>(0);
-  const [fill, setFill] = useState<number>(0);
+  const [fill, setFill] = useState<string | number>(0);
+  const [inputUSDT, setInputUSDT] = useState<boolean>(true);
   const [currentPrise, setCurrentPrise] = useState<boolean>(false);
 
   const costs = api.coin.getCosts.useQuery({
@@ -98,6 +107,12 @@ export default function RightMenu({ onButtonClick, session }: Props) {
         </div>
         <div className="mt-[17px] flex items-center gap-[30px]">
           <Button
+            isDisabled={
+              Number(fill).toString() !== fill ||
+              Number(fill) <= 0 ||
+              price <= 0 ||
+              (userDeposit.data ?? 0) === 0
+            }
             color="success"
             isLoading={buyOrder.isPending}
             className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
@@ -106,18 +121,24 @@ export default function RightMenu({ onButtonClick, session }: Props) {
                 buy.mutate({
                   cost: price,
                   coin: typeCoin,
-                  amount: fill,
+                  amount: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) / (costs.data?.price ?? 1),
                 });
                 buyOrder.mutate({
                   price: price,
-                  fill: fill,
+                  fill: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) / (costs.data?.price ?? 1),
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
                   isAlreadyCompleted: true,
                 });
               } else {
                 buyOrder.mutate({
                   price: price,
-                  fill: fill,
+                  fill: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) / (costs.data?.price ?? 1),
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
                   isAlreadyCompleted: false,
                 });
@@ -127,13 +148,21 @@ export default function RightMenu({ onButtonClick, session }: Props) {
             Купить
           </Button>
           <Button
+            isDisabled={
+              Number(fill).toString() !== fill ||
+              Number(fill) <= 0 ||
+              price <= 0 ||
+              (userDeposit.data ?? 0) === 0
+            }
             color="danger"
             className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
             isLoading={sellOrder.isPending}
             onClick={() => {
               sellOrder.mutate({
                 price: price,
-                fill: fill,
+                fill: inputUSDT
+                  ? Number(fill)
+                  : Number(fill) / (costs.data?.price ?? 1),
                 symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
               });
             }}
@@ -147,6 +176,7 @@ export default function RightMenu({ onButtonClick, session }: Props) {
             mainWrapper: "h-full ",
             input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
             innerWrapper: "flex",
+            label: "text-[#b7b2b2] font-[600] text-[12px]",
             inputWrapper:
               "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
           }}
@@ -176,29 +206,76 @@ export default function RightMenu({ onButtonClick, session }: Props) {
             );
           }}
         />
-        <Input
-          classNames={{
-            base: "max-w-full max-w-[300px] w-full h-[40px] mt-[17px] ",
-            mainWrapper: "h-full ",
-            input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
-            innerWrapper: "flex",
-            inputWrapper:
-              "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
-          }}
-          endContent={
-            <div className="h-full flex items-center justify-center w-[110px]">
-              <h3 className="text-[#45979f] font-[800] text-[12px] w-[120px] text-center">
-                USDT
-              </h3>
-            </div>
-          }
-          label="Заполнить по стоимости"
+        <Select
+          className="max-w-xs"
+          disableSelectorIconRotation
+          defaultSelectedKeys={["usdt"]}
+          variant="underlined"
           size="sm"
-          value={`${fill}`}
-          onChange={(e) =>
-            setFill(isValueIntOrFloat(e.target.value) ? +e.target.value : fill)
-          }
-        />
+          onChange={(e) => {
+            setFill(0);
+            setInputUSDT(!inputUSDT);
+          }}
+          classNames={{
+            base: "flex justify-center items-center",
+            mainWrapper: "max-w-full max-w-[240px] w-full h-[30px] flex",
+            label: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent",
+            listbox:
+              "border-[black] data-[hover=true]:bg-[white] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text text-black",
+          }}
+        >
+          <SelectItem key="usdt">Заполнить по стоимости</SelectItem>
+          <SelectItem key="value">Заполнить по кол-ву</SelectItem>
+        </Select>
+        {inputUSDT ? (
+          <Input
+            classNames={{
+              base: "max-w-full max-w-[300px] w-full h-[30px] ",
+              mainWrapper: "h-full ",
+              input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
+              innerWrapper: "flex",
+              inputWrapper:
+                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+            }}
+            endContent={
+              <div className="h-full flex items-center justify-center w-[110px]">
+                <h3 className="text-[#45979f] font-[800] text-[12px] w-[120px] text-center">
+                  USDT
+                </h3>
+              </div>
+            }
+            // label="Заполнить по стоимости"
+            size="sm"
+            value={`${fill}`}
+            onChange={(e) => {
+              isValueIntOrFloat(e.target.value) && setFill(e.target.value);
+            }}
+          />
+        ) : (
+          <Input
+            classNames={{
+              base: "max-w-full max-w-[300px] w-full h-[30px] ",
+              mainWrapper: "h-full ",
+              input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
+              innerWrapper: "flex",
+              inputWrapper:
+                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+            }}
+            endContent={
+              <div className="h-full flex items-center justify-center w-[110px]">
+                <h3 className="text-[#45979f] font-[800] text-[12px] w-[120px] text-center">
+                  {typeCoin}
+                </h3>
+              </div>
+            }
+            // label="Заполнить по стоимости"
+            size="sm"
+            value={`${fill}`}
+            onChange={(e) => {
+              isValueIntOrFloat(e.target.value) && setFill(e.target.value);
+            }}
+          />
+        )}
         <div className="mt-[15px] flex items-center gap-[1px]">
           <ButtonGroup>
             {fillButtons.map((button) => (
