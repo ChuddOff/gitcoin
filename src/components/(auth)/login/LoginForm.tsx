@@ -120,6 +120,7 @@ export default function LoginForm() {
           <div className=" flex gap-3">
             {oAuthButtons.map((button) => (
               <button
+                type="button"
                 key={button.name}
                 onClick={button.callback}
                 className="p-1 rounded-full"

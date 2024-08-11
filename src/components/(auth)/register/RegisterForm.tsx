@@ -21,7 +21,7 @@ export default function LoginForm() {
 
   const [error, setError] = useState("");
 
-  const router = useRouter()
+  const router = useRouter();
 
   const registerMutation = useMutation({
     mutationFn: async () => {
@@ -58,20 +58,20 @@ export default function LoginForm() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-        registerSchema.parse({ username, password, email });
+      registerSchema.parse({ username, password, email });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            error.issues.forEach((issue) => {
-                if (issue.path[0] === "username") {
-                    setUsernameError(issue.message);
-                } else if (issue.path[0] === "password") {
-                    setPasswordError(issue.message);
-                } else if (issue.path[0] === "email") {
-                    setEmailError(issue.message);
-                }
-            });
-        }
-        return;
+      if (error instanceof z.ZodError) {
+        error.issues.forEach((issue) => {
+          if (issue.path[0] === "username") {
+            setUsernameError(issue.message);
+          } else if (issue.path[0] === "password") {
+            setPasswordError(issue.message);
+          } else if (issue.path[0] === "email") {
+            setEmailError(issue.message);
+          }
+        });
+      }
+      return;
     }
 
     setUsernameError("");
@@ -153,6 +153,7 @@ export default function LoginForm() {
           <div className=" flex gap-3">
             {oAuthButtons.map((button) => (
               <button
+                type="button"
                 key={button.name}
                 onClick={button.callback}
                 className="p-1 rounded-full"
