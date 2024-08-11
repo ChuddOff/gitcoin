@@ -5,8 +5,6 @@ const Chart: React.FC = () => {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
 
-  console.log(tvwidgetsymbol);
-
   const chart = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import {
-  JsonValue,
-  PrismaClientKnownRequestError,
-} from "@prisma/client/runtime/library";
 import ccxt from "ccxt";
+import { Prisma } from "@prisma/client";
+
+interface PocketItem {
+  [key: string]: number; // Define the index signature for pocketItem
+}
 
 export const coinRouter = createTRPCRouter({
   buy: protectedProcedure
@@ -20,15 +21,25 @@ export const coinRouter = createTRPCRouter({
         });
       }
 
-      const profilePocket = new Map(Object.entries(user.pocket));
+      let userPocket = user.pocket;
 
-      if (profilePocket.has(input.coin)) {
-        const value = profilePocket.get(input.coin);
-        if (typeof value === "number") {
-          profilePocket.set(input.coin, value + input.amount);
-        }
+      const existPocket = (userPocket as PocketItem[]).find(
+        (pocketItem) => pocketItem[input.coin] !== undefined
+      );
+
+      if (existPocket) {
+        const existingPocketIndex = userPocket.indexOf(existPocket);
+        const updatedPocket = userPocket[existingPocketIndex] as Record<
+          string,
+          number
+        >;
+        updatedPocket[input.coin] += input.amount;
+
+        userPocket[existingPocketIndex] = updatedPocket;
       } else {
-        profilePocket.set(input.coin, input.amount);
+        userPocket.push({
+          [input.coin]: input.amount,
+        });
       }
 
       await ctx.db.user.update({
@@ -36,9 +47,7 @@ export const coinRouter = createTRPCRouter({
           id: user.id,
         },
         data: {
-          pocket: {
-            push: Object.fromEntries(profilePocket) as unknown as JsonValue[],
-          },
+          pocket: userPocket as Prisma.InputJsonValue[],
         },
       });
 

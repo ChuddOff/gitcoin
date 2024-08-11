@@ -20,7 +20,6 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { Orders } from "@prisma/client";
-import { UseTRPCMutationResult } from "@trpc/react-query/shared";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -38,7 +37,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
       }
     },
   });
-  const buy = api.coin.buy.useMutation({});
+  const buy = api.coin.buy.useMutation();
 
   const [currentOrder, setCurrentOrder] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -48,8 +47,9 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
   const utils = api.useUtils();
 
   const markAsCompleted = api.order.markAsCompleted.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data) {
+        await utils.order.getAll.invalidate();
         toast.success(
           "Вы успешно преобрели " +
             data.symbol +
@@ -68,8 +68,8 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
         isHeaderSticky={true}
         classNames={{
           th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-          base: "p-[0px] m-[0px] h-[150px] ",
-          table: "p-[0px] m-[0px] h-[5px] ",
+          base: "p-[0px] m-[0px] h-[150px]",
+          table: "p-[0px] m-[0px] h-[5px] focus-within:outline-none",
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
           wrapper: "p-[0px] m-[0px] h-full bg-white",
@@ -140,15 +140,14 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
                   <Button
                     size="sm"
                     onClick={async () => {
-                      await buy.mutate({
+                      buy.mutate({
                         cost: item.orderPrice,
                         coin: item.symbol,
                         amount: item.fill,
                       });
-                      await markAsCompleted.mutate({
+                      markAsCompleted.mutate({
                         id: item.id,
                       });
-                      await utils.order.getAll.refetch();
                     }}
                   >
                     Закрыть по рс

@@ -86,7 +86,7 @@ export default function AppExchange({ session }: Props) {
         </div>
 
         {/* Right menu */}
-        <RightMenu onButtonClick={refetchOrders} session={session} />
+        <RightMenu session={session} />
       </div>
     </main>
   );

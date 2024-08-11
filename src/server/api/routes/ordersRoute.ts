@@ -42,7 +42,7 @@ export const ordersRouter = createTRPCRouter({
       if (ctx.session.user.deposit < fill) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Balance is not enough",
+          message: "Недостаточно средств",
         });
       }
 
@@ -89,7 +89,7 @@ export const ordersRouter = createTRPCRouter({
       if (ctx.session.user.deposit < price) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Balance is not enough",
+          message: "Недостаточно средств",
         });
       }
 

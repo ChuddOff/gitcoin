@@ -15,11 +15,10 @@ import { Session } from "next-auth";
 import { number } from "zod";
 
 interface Props {
-  onButtonClick: () => void;
   session: Session | null;
 }
 
-export default function RightMenu({ onButtonClick, session }: Props) {
+export default function RightMenu({ session }: Props) {
   const searchParams = useSearchParams();
   const tvwidgetsymbol = searchParams.get("tvwidgetsymbol");
   const typeCoin =
@@ -46,13 +45,15 @@ export default function RightMenu({ onButtonClick, session }: Props) {
     type: typeCoin,
   });
 
+  const utils = api.useUtils();
+
   const userDeposit = api.user.getUserDeposit.useQuery();
   const buyOrder = api.order.buyOrder.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data) {
+        await Promise.all([userDeposit.refetch(), utils.order.getAll.invalidate()]);
+
         toast.success("Ордер успешно создан!");
-        userDeposit.refetch();
-        onButtonClick();
       }
     },
     onError: (error) => {
@@ -60,16 +61,16 @@ export default function RightMenu({ onButtonClick, session }: Props) {
     },
   });
   const buy = api.coin.buy.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data) {
+        await Promise.all([userDeposit.refetch(), utils.order.getAll.invalidate()]);
+
         toast.success(
           "Вы успешно преобрели " +
             data.coin +
             " в размере " +
             (data.amount / (costs.data?.price ?? 1)).toFixed(4)
         );
-        onButtonClick();
-        userDeposit.refetch();
       }
     },
   });
