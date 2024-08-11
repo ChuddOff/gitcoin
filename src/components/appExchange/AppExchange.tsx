@@ -56,14 +56,10 @@ export default function AppExchange({ session }: Props) {
           id: order.id,
         });
       }
-
-      // #1e2329 cards color
-      // #181a20
     });
   };
 
   useEffect(() => {
-    // add refetch orders logic
     checkOrders();
   }, [orders]);
 

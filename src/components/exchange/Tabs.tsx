@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import YourOrders from "../userOrders/yourOrders/YourOrders";
 import OrdersHistory from "../userOrders/ordersHistory/OrdersHistory";
 import TradeHistory from "../userOrders/tradeHistory/TradeHistory";
+import { UseTRPCMutationResult } from "@trpc/react-query/shared";
 
 interface Props {
   orders: Omit<Orders, "userId">[] | undefined;

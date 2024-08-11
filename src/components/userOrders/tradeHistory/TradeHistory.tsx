@@ -52,7 +52,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
           wrapper: "p-[0px] m-[0px] h-full bg-white",
-          td: "py-[4px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
+          td: "py-[4.5px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
         }}
       >
         <TableHeader>

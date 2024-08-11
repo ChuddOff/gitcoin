@@ -20,6 +20,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { Orders } from "@prisma/client";
+import { UseTRPCMutationResult } from "@trpc/react-query/shared";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -37,11 +38,27 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
       }
     },
   });
+  const buy = api.coin.buy.useMutation({});
 
   const [currentOrder, setCurrentOrder] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [TP, setTP] = useState<number>(0);
   const [SL, setSL] = useState<number>(0);
+
+  const utils = api.useUtils();
+
+  const markAsCompleted = api.order.markAsCompleted.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(
+          "Вы успешно преобрели " +
+            data.symbol +
+            " в размере " +
+            (data.fill / (cost ?? 1)).toFixed(4)
+        );
+      }
+    },
+  });
 
   return (
     <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
@@ -120,7 +137,22 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
                   >
                     Установить TP/SL
                   </Button>
-                  <Button size="sm">Закрыть по рс</Button>
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      await buy.mutate({
+                        cost: item.orderPrice,
+                        coin: item.symbol,
+                        amount: item.fill,
+                      });
+                      await markAsCompleted.mutate({
+                        id: item.id,
+                      });
+                      await utils.order.getAll.refetch();
+                    }}
+                  >
+                    Закрыть по рс
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>

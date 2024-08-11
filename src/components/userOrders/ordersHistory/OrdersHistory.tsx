@@ -56,7 +56,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
           tbody: "p-[0px] m-[0px] h-[5px]",
           emptyWrapper: "p-[0px] m-[0px] h-[5px]",
           wrapper: "p-[0px] m-[0px] h-full bg-white",
-          td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
+          td: "py-[4.5px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
         }}
       >
         <TableHeader>
@@ -64,7 +64,6 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
           <TableColumn>Цена оредера</TableColumn>
           <TableColumn>Маржа</TableColumn>
           <TableColumn>TP/SL</TableColumn>
-          <TableColumn>Действия</TableColumn>
         </TableHeader>
         <TableBody
           isLoading={isPending}
@@ -107,81 +106,10 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
               <TableCell>
                 {item.TakeProfit} / {item.StopLoss}
               </TableCell>
-              <TableCell>
-                <div className="flex gap-[9px]">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setCurrentOrder(item.id);
-                      setTP(item.TakeProfit);
-                      setSL(item.StopLoss);
-                      onOpen();
-                    }}
-                  >
-                    Установить TP/SL
-                  </Button>
-                  <Button size="sm">Закрыть по рс</Button>
-                </div>
-              </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1 text-black">
-                Укажите TP и SL <br /> (Значение 0 - не установливать)
-              </ModalHeader>
-              <ModalBody>
-                <Input
-                  autoFocus
-                  label="TP"
-                  type="number"
-                  variant="bordered"
-                  className="text-black"
-                  onChange={(e) =>
-                    Number(e.target.value) > SL || SL === 0
-                      ? setTP(Number(e.target.value))
-                      : TP
-                  }
-                  value={TP?.toString()}
-                />
-                <Input
-                  label="SL"
-                  type="number"
-                  variant="bordered"
-                  className="text-black"
-                  onChange={(e) =>
-                    Number(e.target.value) < TP || TP === 0
-                      ? setSL(Number(e.target.value))
-                      : SL
-                  }
-                  value={SL?.toString()}
-                />
-                <div className="flex py-2 px-1 justify-between"></div>
-              </ModalBody>
-              <ModalFooter>
-                <Button
-                  isLoading={updateOrder.isPending}
-                  color="primary"
-                  onPress={() => {
-                    updateOrder.mutate({
-                      id: currentOrder,
-                      tp: TP ?? 0,
-                      sl: SL ?? 0,
-                    });
-                    onClose();
-                  }}
-                >
-                  Подтвердить
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
     </div>
   );
 };

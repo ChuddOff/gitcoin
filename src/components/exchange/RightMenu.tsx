@@ -30,11 +30,11 @@ export default function RightMenu({ onButtonClick, session }: Props) {
   };
 
   const fillButtons = [
-    { value: "10%" },
-    { value: "25%" },
-    { value: "50%" },
-    { value: "75%" },
-    { value: "100%" },
+    { value: 10 },
+    { value: 25 },
+    { value: 50 },
+    { value: 75 },
+    { value: 100 },
   ];
 
   const [price, setPrice] = useState<number>(0);
@@ -86,7 +86,6 @@ export default function RightMenu({ onButtonClick, session }: Props) {
   return (
     <div className="pb-[13px] rounded-[5px] w-[340px] h-full bg-gradient-to-b from-[#93A1F8] to-[#42D2C9] flex flex-col items-center">
       <div className="mt-[17px] relative flex flex-col items-center">
-        {/* Blurred background */}
         {!session && (
           <div className=" absolute top-0 left-0 backdrop-blur-md z-30 w-full h-full rounded-[5px] flex items-center justify-center">
             <h1 className=" text-black font-bold text-lg">Login to do trade</h1>
@@ -123,13 +122,13 @@ export default function RightMenu({ onButtonClick, session }: Props) {
                   coin: typeCoin,
                   amount: inputUSDT
                     ? Number(fill)
-                    : Number(fill) / (costs.data?.price ?? 1),
+                    : Number(fill) * (costs.data?.price ?? 1),
                 });
                 buyOrder.mutate({
                   price: price,
                   fill: inputUSDT
                     ? Number(fill)
-                    : Number(fill) / (costs.data?.price ?? 1),
+                    : Number(fill) * (costs.data?.price ?? 1),
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
                   isAlreadyCompleted: true,
                 });
@@ -138,7 +137,7 @@ export default function RightMenu({ onButtonClick, session }: Props) {
                   price: price,
                   fill: inputUSDT
                     ? Number(fill)
-                    : Number(fill) / (costs.data?.price ?? 1),
+                    : Number(fill) * (costs.data?.price ?? 1),
                   symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
                   isAlreadyCompleted: false,
                 });
@@ -162,7 +161,7 @@ export default function RightMenu({ onButtonClick, session }: Props) {
                 price: price,
                 fill: inputUSDT
                   ? Number(fill)
-                  : Number(fill) / (costs.data?.price ?? 1),
+                  : Number(fill) * (costs.data?.price ?? 1),
                 symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
               });
             }}
@@ -264,7 +263,7 @@ export default function RightMenu({ onButtonClick, session }: Props) {
             endContent={
               <div className="h-full flex items-center justify-center w-[110px]">
                 <h3 className="text-[#45979f] font-[800] text-[12px] w-[120px] text-center">
-                  {typeCoin}
+                  {typeCoin.slice(0, -5)}
                 </h3>
               </div>
             }
@@ -281,13 +280,17 @@ export default function RightMenu({ onButtonClick, session }: Props) {
             {fillButtons.map((button) => (
               <Button
                 onClick={() =>
-                  setFill(Math.floor((userDeposit.data ?? 0) / 10))
+                  setFill(
+                    Math.floor(
+                      ((userDeposit.data ?? 0) * button.value) / 100
+                    ).toString()
+                  )
                 }
                 size="sm"
                 key={button.value}
                 className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
               >
-                {button.value}
+                {button.value + "%"}
               </Button>
             ))}
           </ButtonGroup>
