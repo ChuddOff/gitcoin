@@ -3,6 +3,7 @@ import {
   ButtonGroup,
   Input,
   Select,
+  Selection,
   SelectItem,
   Skeleton,
 } from "@nextui-org/react";
@@ -12,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { Session } from "next-auth";
-import { number } from "zod";
+import BuyButton from "./RightMenu/BuyButton";
 
 interface Props {
   session: Session | null;
@@ -36,9 +37,14 @@ export default function RightMenu({ session }: Props) {
     { value: 100 },
   ];
 
+  const selectInputTypeButtons = [
+    { key: "usdt", label: "заполнить по стоимости" },
+    { key: "coin", label: "заполнить по количеству" },
+  ];
+
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<string | number>(0);
-  const [inputUSDT, setInputUSDT] = useState<boolean>(true);
+  const [inputUSDT, setInputUSDT] = useState<Selection>(new Set(["usdt"]));
   const [currentPrise, setCurrentPrise] = useState<boolean>(false);
 
   const costs = api.coin.getCosts.useQuery({
@@ -67,6 +73,7 @@ export default function RightMenu({ session }: Props) {
       toast.error(error.message);
     },
   });
+
   const buy = api.coin.buy.useMutation({
     onSuccess: async (data) => {
       if (data) {
@@ -134,47 +141,18 @@ export default function RightMenu({ session }: Props) {
           )}
         </div>
         <div className="mt-[17px] flex items-center gap-[30px]">
-          <Button
-            isDisabled={
-              Number(fill).toString() !== fill ||
-              Number(fill) <= 0 ||
-              price <= 0 ||
-              (userDeposit.data ?? 0) === 0
-            }
-            color="success"
-            isLoading={buyOrder.isPending}
-            className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#20B26C]"
-            onClick={() => {
-              if (currentPrise) {
-                buy.mutate({
-                  cost: price,
-                  coin: typeCoin,
-                  amount: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                });
-                buyOrder.mutate({
-                  price: price,
-                  fill: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-                  isAlreadyCompleted: true,
-                });
-              } else {
-                buyOrder.mutate({
-                  price: price,
-                  fill: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-                  isAlreadyCompleted: false,
-                });
-              }
-            }}
-          >
-            Купить
-          </Button>
+          <BuyButton
+            fill={fill}
+            costs={costs}
+            typeCoin={typeCoin}
+            userDeposit={userDeposit}
+            tvwidgetsymbol={tvwidgetsymbol}
+            inputType={inputUSDT as Set<"usdt" | "coin">}
+            price={price}
+            currentPrise={currentPrise}
+            buy={buy}
+            buyOrder={buyOrder}
+          />
           <Button
             isDisabled={
               Number(fill).toString() !== fill ||
@@ -255,14 +233,11 @@ export default function RightMenu({ session }: Props) {
         />
         <Select
           className="max-w-xs"
+          aria-label="Options"
           disableSelectorIconRotation
           defaultSelectedKeys={["usdt"]}
           variant="underlined"
           size="sm"
-          onChange={(e) => {
-            setFill(0);
-            setInputUSDT(!inputUSDT);
-          }}
           classNames={{
             base: "flex justify-center items-center",
             mainWrapper: "max-w-full max-w-[240px] w-full h-[30px] flex",
@@ -270,9 +245,11 @@ export default function RightMenu({ session }: Props) {
             listbox:
               "border-[black] data-[hover=true]:bg-[white] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text text-black",
           }}
+          onSelectionChange={setInputUSDT}
         >
-          <SelectItem key="usdt">Заполнить по стоимости</SelectItem>
-          <SelectItem key="value">Заполнить по кол-ву</SelectItem>
+          {selectInputTypeButtons.map((item) => (
+            <SelectItem key={item.key}>{item.label}</SelectItem>
+          ))}
         </Select>
         {inputUSDT ? (
           <Input
