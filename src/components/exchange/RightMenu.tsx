@@ -45,15 +45,20 @@ export default function RightMenu({ session }: Props) {
     type: typeCoin,
   });
 
-  const userPocket = session?.user.pocket.filter((item) => item[typeCoin] !== undefined);
-
   const utils = api.useUtils();
+
+  const userPocket = session?.user?.pocket.find(
+    (pocketItem) => pocketItem[typeCoin] !== undefined
+  );
 
   const userDeposit = api.user.getUserDeposit.useQuery();
   const buyOrder = api.order.buyOrder.useMutation({
     onSuccess: async (data) => {
-      if (data) {
-        await Promise.all([userDeposit.refetch(), utils.order.getAll.invalidate()]);
+      if (data && !data.isAlreadyCompleted) {
+        await Promise.all([
+          userDeposit.refetch(),
+          utils.order.getAll.invalidate(),
+        ]);
 
         toast.success("Ордер успешно создан!");
       }
@@ -65,7 +70,10 @@ export default function RightMenu({ session }: Props) {
   const buy = api.coin.buy.useMutation({
     onSuccess: async (data) => {
       if (data) {
-        await Promise.all([userDeposit.refetch(), utils.order.getAll.invalidate()]);
+        await Promise.all([
+          userDeposit.refetch(),
+          utils.order.getAll.invalidate(),
+        ]);
 
         toast.success(
           "Вы успешно преобрели " +
@@ -77,11 +85,29 @@ export default function RightMenu({ session }: Props) {
     },
   });
 
-  const sellOrder = api.order.sellOrder.useMutation({
-    onSuccess: (data) => {
+  const sell = api.coin.sell.useMutation({
+    onSuccess: async (data) => {
       if (data) {
-        toast.success(data.massage);
-        userDeposit.refetch();
+        await Promise.all([
+          userDeposit.refetch(),
+          utils.order.getAll.invalidate(),
+        ]);
+
+        toast.success(
+          "Вы успешно продали " +
+            data.coin +
+            " в размере " +
+            (data.amount / (costs.data?.price ?? 1)).toFixed(4)
+        );
+      }
+    },
+  });
+
+  const sellOrder = api.order.sellOrder.useMutation({
+    onSuccess: async (data) => {
+      if (data && !data.isAlreadyCompleted) {
+        await userDeposit.refetch();
+        toast.success("Ордер успешно создан!");
       }
     },
   });
@@ -153,20 +179,39 @@ export default function RightMenu({ session }: Props) {
             isDisabled={
               Number(fill).toString() !== fill ||
               Number(fill) <= 0 ||
-              price <= 0 ||
-              (userDeposit.data ?? 0) === 0
+              (userPocket![typeCoin] ?? 0) <= Number(fill) ||
+              price <= 0
             }
             color="danger"
             className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
             isLoading={sellOrder.isPending}
             onClick={() => {
-              sellOrder.mutate({
-                price: price,
-                fill: inputUSDT
-                  ? Number(fill)
-                  : Number(fill) * (costs.data?.price ?? 1),
-                symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-              });
+              if (currentPrise) {
+                sellOrder.mutate({
+                  price: price,
+                  fill: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) * (costs.data?.price ?? 1),
+                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                  isAlreadyCompleted: true,
+                });
+                sell.mutate({
+                  cost: price,
+                  coin: typeCoin,
+                  amount: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) * (costs.data?.price ?? 1),
+                });
+              } else {
+                sellOrder.mutate({
+                  price: price,
+                  fill: inputUSDT
+                    ? Number(fill)
+                    : Number(fill) * (costs.data?.price ?? 1),
+                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
+                  isAlreadyCompleted: false,
+                });
+              }
             }}
           >
             Продать
@@ -284,9 +329,15 @@ export default function RightMenu({ session }: Props) {
               <Button
                 onClick={() =>
                   setFill(
-                    Math.floor(
-                      ((userDeposit.data ?? 0) * button.value) / 100
-                    ).toString()
+                    inputUSDT
+                      ? Math.floor(
+                          ((userDeposit.data ?? 0) * button.value) / 100
+                        ).toString()
+                      : (
+                          ((userDeposit.data ?? 0) * button.value) /
+                          100 /
+                          (costs.data?.price ?? 1)
+                        ).toFixed(8)
                   )
                 }
                 size="sm"

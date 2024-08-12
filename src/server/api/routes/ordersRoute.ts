@@ -69,7 +69,10 @@ export const ordersRouter = createTRPCRouter({
         },
       });
 
-      return { massage: "Успешно!" };
+      return {
+        massage: "Успешно!",
+        isAlreadyCompleted: input.isAlreadyCompleted,
+      };
     }),
 
   sellOrder: protectedProcedure
@@ -78,6 +81,7 @@ export const ordersRouter = createTRPCRouter({
         price: z.number(),
         fill: z.number(),
         symbol: z.string(),
+        isAlreadyCompleted: z.boolean(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -85,18 +89,18 @@ export const ordersRouter = createTRPCRouter({
 
       const { price, fill, symbol } = input;
 
-      if (ctx.session.user.deposit < price) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Недостаточно средств",
-        });
-      }
-
       let userPocket = user.pocket;
 
       const existPocket = userPocket.find(
         (pocketItem) => pocketItem[input.symbol] !== undefined
       );
+
+      if (existPocket![symbol] < fill) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Недостаточно средств",
+        });
+      }
 
       if (existPocket) {
         const existingPocketIndex = userPocket.indexOf(existPocket);
@@ -133,10 +137,14 @@ export const ordersRouter = createTRPCRouter({
           type: "sell",
           fill,
           symbol,
+          completed: input.isAlreadyCompleted,
         },
       });
 
-      return { massage: "Успешно!" };
+      return {
+        massage: "Успешно!",
+        isAlreadyCompleted: input.isAlreadyCompleted,
+      };
     }),
 
   updateOrder: protectedProcedure

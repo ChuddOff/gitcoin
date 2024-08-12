@@ -52,10 +52,10 @@ export const coinRouter = createTRPCRouter({
 
   sell: protectedProcedure
     .input(z.object({ cost: z.number(), coin: z.string(), amount: z.number() }))
-    .query(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { user } = ctx.session;
 
-      ctx.db.user.update({
+      await ctx.db.user.update({
         where: {
           id: user.id,
         },
@@ -63,6 +63,8 @@ export const coinRouter = createTRPCRouter({
           deposit: user.deposit + input.cost,
         },
       });
+
+      return { success: true, coin: input.coin, amount: input.amount };
     }),
 
   getCosts: publicProcedure
