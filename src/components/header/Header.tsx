@@ -6,11 +6,13 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
+  Switch,
 } from "@nextui-org/react";
 import Search from "../search/Search";
 import Image from "next/image";
 import UserInfo from "./UserInfo";
 import { Session } from "next-auth";
+import DarkMode from "./DarkMode";
 
 interface Props {
   session: Session | null;
@@ -18,11 +20,17 @@ interface Props {
 
 const Header = ({ session }: Props) => {
   return (
-    <Navbar isBordered={true} className="select-none bg-white">
+    <Navbar
+      isBordered={true}
+      className="light select-none light:bg-white dark:bg-gray-500"
+    >
       <NavbarBrand>
         <Link href="/">
           <Image src="/logo.svg" alt="logo" width={44.23} height={41.49} />
         </Link>
+        <NavbarItem className=" w-full flex justify-center items-center">
+          <DarkMode />
+        </NavbarItem>
       </NavbarBrand>
 
       <NavbarContent as="div" className="sm:flex" justify="center">
