@@ -4,10 +4,6 @@ import { TRPCError } from "@trpc/server";
 import ccxt from "ccxt";
 import { Prisma } from "@prisma/client";
 
-interface PocketItem {
-  [key: string]: number; // Define the index signature for pocketItem
-}
-
 export const coinRouter = createTRPCRouter({
   buy: protectedProcedure
     .input(z.object({ cost: z.number(), coin: z.string(), amount: z.number() }))
@@ -23,7 +19,7 @@ export const coinRouter = createTRPCRouter({
 
       let userPocket = user.pocket;
 
-      const existPocket = (userPocket as PocketItem[]).find(
+      const existPocket = userPocket.find(
         (pocketItem) => pocketItem[input.coin] !== undefined
       );
 

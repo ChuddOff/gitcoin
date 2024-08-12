@@ -22,6 +22,10 @@ import { Orders } from "@prisma/client";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 
+interface PocketItem {
+  [key: string]: number;
+}
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
@@ -29,7 +33,7 @@ declare module "next-auth" {
       // ...other properties
       deposit: number;
       bonus: boolean;
-      pocket: JsonValue[];
+      pocket: PocketItem[];
       orders: Orders[];
     } & DefaultSession["user"];
   }
@@ -43,7 +47,7 @@ declare module "next-auth/jwt" {
     image: string;
     deposit: number;
     bonus: boolean;
-    pocket: JsonValue[];
+    pocket: PocketItem[];
     orders: Orders[];
   }
 }
@@ -101,6 +105,7 @@ export const authOptions: NextAuthOptions = {
         });
         return {
           ...dbUser,
+          pocket: dbUser.pocket as PocketItem[],
           sub: token.sub,
         };
       }
@@ -111,7 +116,7 @@ export const authOptions: NextAuthOptions = {
         name: dbuser!.name,
         email: dbuser!.email,
         image: dbuser!.image,
-        pocket: dbuser!.pocket,
+        pocket: dbuser!.pocket as PocketItem[],
         deposit: dbuser!.deposit,
         bonus: dbuser!.bonus,
         orders: dbuser!.orders,

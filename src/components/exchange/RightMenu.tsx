@@ -45,6 +45,8 @@ export default function RightMenu({ session }: Props) {
     type: typeCoin,
   });
 
+  const userPocket = session?.user.pocket.filter((item) => item[typeCoin] !== undefined);
+
   const utils = api.useUtils();
 
   const userDeposit = api.user.getUserDeposit.useQuery();

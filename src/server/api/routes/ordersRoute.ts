@@ -1,6 +1,5 @@
-import { symbol, z } from "zod";
+import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { OrderType } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 
@@ -93,15 +92,25 @@ export const ordersRouter = createTRPCRouter({
         });
       }
 
-      const profilePocket = new Map(Object.entries(user.pocket));
+      let userPocket = user.pocket;
 
-      if (profilePocket.has(input.symbol)) {
-        profilePocket.set(
-          input.symbol,
-          ((profilePocket.get(input.symbol) as number) ?? 0) - input.fill
-        );
+      const existPocket = userPocket.find(
+        (pocketItem) => pocketItem[input.symbol] !== undefined
+      );
+
+      if (existPocket) {
+        const existingPocketIndex = userPocket.indexOf(existPocket);
+        const updatedPocket = userPocket[existingPocketIndex] as Record<
+          string,
+          number
+        >;
+        updatedPocket[input.symbol] += input.price;
+
+        userPocket[existingPocketIndex] = updatedPocket;
       } else {
-        profilePocket.set(input.symbol, input.fill);
+        userPocket.push({
+          [input.symbol]: input.price,
+        });
       }
 
       await ctx.db.user.update({
@@ -109,7 +118,7 @@ export const ordersRouter = createTRPCRouter({
           id: user.id,
         },
         data: {
-          pocket: Object.fromEntries(profilePocket),
+          pocket: userPocket,
         },
       });
 
