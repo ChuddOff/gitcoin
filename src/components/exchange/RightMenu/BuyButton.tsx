@@ -28,6 +28,9 @@ export default function BuyButton({
   inputType,
 }: Props) {
   const utils = api.useUtils();
+  const usdtOrCoin = inputType.has("usdt")
+    ? Number(fill)
+    : Number(fill) * (costs.data?.price ?? 1);
 
   const buyOrder = api.order.buyOrder.useMutation({
     onSuccess: async (data) => {
@@ -78,33 +81,25 @@ export default function BuyButton({
           buy.mutate({
             cost: price,
             coin: typeCoin,
-            amount: inputType.has("usdt")
-              ? Number(fill)
-              : Number(fill) * (costs.data?.price ?? 1),
+            amount: usdtOrCoin,
           });
           buyOrder.mutate({
             price: price,
-            fill: inputType.has("usdt")
-              ? Number(fill)
-              : Number(fill) * (costs.data?.price ?? 1),
+            fill: usdtOrCoin,
             symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
             isAlreadyCompleted: true,
           });
         } else {
           buyOrder.mutate({
             price: price,
-            fill: inputType.has("usdt")
-              ? Number(fill)
-              : Number(fill) * (costs.data?.price ?? 1),
+            fill: usdtOrCoin,
             symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
             isAlreadyCompleted: false,
           });
         }
       }}
     >
-      {inputType.has("usdt")
-        ? "Заполнить по стоимости"
-        : "Заполнить по количеству"}
+      Купить
     </Button>
   );
 }

@@ -22,7 +22,7 @@ import { Orders } from "@prisma/client";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 
-interface PocketItem {
+export interface PocketItem {
   [key: string]: number;
 }
 

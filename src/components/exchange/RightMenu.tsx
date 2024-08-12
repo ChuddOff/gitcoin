@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import { Session } from "next-auth";
 import BuyButton from "./RightMenu/BuyButton";
+import SellButton from "./RightMenu/SellButton";
+import { z } from "zod";
 
 interface Props {
   session: Session | null;
@@ -26,7 +28,8 @@ export default function RightMenu({ session }: Props) {
     (tvwidgetsymbol?.slice(tvwidgetsymbol?.indexOf(":") + 1, -3) ?? "BTC") +
     "/USDT";
   const isValueIntOrFloat = (value: string) => {
-    return !Number.isNaN(Number(value));
+
+    return !Number.isNaN(+value);
   };
 
   const fillButtons = [
@@ -44,7 +47,7 @@ export default function RightMenu({ session }: Props) {
 
   const [price, setPrice] = useState<number>(0);
   const [fill, setFill] = useState<string | number>(0);
-  const [inputUSDT, setInputUSDT] = useState<Selection>(new Set(["usdt"]));
+  const [inputType, setInputType] = useState<Set<string>>(new Set(["usdt"]));
   const [currentPrise, setCurrentPrise] = useState<boolean>(false);
 
   const costs = api.coin.getCosts.useQuery({
@@ -92,33 +95,6 @@ export default function RightMenu({ session }: Props) {
     },
   });
 
-  const sell = api.coin.sell.useMutation({
-    onSuccess: async (data) => {
-      if (data) {
-        await Promise.all([
-          userDeposit.refetch(),
-          utils.order.getAll.invalidate(),
-        ]);
-
-        toast.success(
-          "Вы успешно продали " +
-            data.coin +
-            " в размере " +
-            (data.amount / (costs.data?.price ?? 1)).toFixed(4)
-        );
-      }
-    },
-  });
-
-  const sellOrder = api.order.sellOrder.useMutation({
-    onSuccess: async (data) => {
-      if (data && !data.isAlreadyCompleted) {
-        await userDeposit.refetch();
-        toast.success("Ордер успешно создан!");
-      }
-    },
-  });
-
   return (
     <div className="pb-[13px] rounded-[5px] w-[340px] h-full bg-gradient-to-b from-[#93A1F8] to-[#42D2C9] flex flex-col items-center">
       <div className="mt-[17px] relative flex flex-col items-center">
@@ -135,9 +111,7 @@ export default function RightMenu({ session }: Props) {
               {userDeposit.data}
             </h3>
           ) : (
-            <>
-              <Skeleton className="h-3 w-[70px] rounded-lg" />
-            </>
+            <Skeleton className="h-3 w-[70px] rounded-lg" />
           )}
         </div>
         <div className="mt-[17px] flex items-center gap-[30px]">
@@ -147,54 +121,27 @@ export default function RightMenu({ session }: Props) {
             typeCoin={typeCoin}
             userDeposit={userDeposit}
             tvwidgetsymbol={tvwidgetsymbol}
-            inputType={inputUSDT as Set<"usdt" | "coin">}
+            inputType={inputType as Set<"usdt" | "coin">}
             price={price}
             currentPrise={currentPrise}
             buy={buy}
             buyOrder={buyOrder}
           />
-          <Button
-            isDisabled={
-              Number(fill).toString() !== fill ||
-              Number(fill) <= 0 ||
-              (userPocket![typeCoin] ?? 0) <= Number(fill) ||
-              price <= 0
-            }
-            color="danger"
-            className="text-white text-[15px] w-[120px] rounded-[5px] bg-[#EF454A]"
-            isLoading={sellOrder.isPending}
-            onClick={() => {
-              if (currentPrise) {
-                sellOrder.mutate({
-                  price: price,
-                  fill: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-                  isAlreadyCompleted: true,
-                });
-                sell.mutate({
-                  cost: price,
-                  coin: typeCoin,
-                  amount: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                });
-              } else {
-                sellOrder.mutate({
-                  price: price,
-                  fill: inputUSDT
-                    ? Number(fill)
-                    : Number(fill) * (costs.data?.price ?? 1),
-                  symbol: tvwidgetsymbol || "BITSTAMP:BTCUSD",
-                  isAlreadyCompleted: false,
-                });
-              }
-            }}
-          >
-            Продать
-          </Button>
+
+          <SellButton
+            tvwidgetsymbol={tvwidgetsymbol}
+            price={price}
+            fill={fill}
+            costs={costs}
+            typeCoin={typeCoin}
+            userPocket={userPocket}
+            currentPrise={currentPrise}
+            inputType={inputType as Set<"usdt" | "coin">}
+            sell={buy}
+            sellOrder={buyOrder}
+          />
         </div>
+
         <Input
           classNames={{
             base: "max-w-full max-w-[300px] w-full h-[40px] mt-[17px]",
@@ -231,6 +178,7 @@ export default function RightMenu({ session }: Props) {
             );
           }}
         />
+
         <Select
           className="max-w-xs"
           aria-label="Options"
@@ -245,13 +193,16 @@ export default function RightMenu({ session }: Props) {
             listbox:
               "border-[black] data-[hover=true]:bg-[white] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text text-black",
           }}
-          onSelectionChange={setInputUSDT}
+          onSelectionChange={
+            setInputType as unknown as ((keys: Selection) => void) | undefined
+          }
         >
           {selectInputTypeButtons.map((item) => (
             <SelectItem key={item.key}>{item.label}</SelectItem>
           ))}
         </Select>
-        {inputUSDT ? (
+
+        {inputType.has("usdt") ? (
           <Input
             classNames={{
               base: "max-w-full max-w-[300px] w-full h-[30px] ",
@@ -300,13 +251,14 @@ export default function RightMenu({ session }: Props) {
             }}
           />
         )}
+
         <div className="mt-[15px] flex items-center gap-[1px]">
           <ButtonGroup>
             {fillButtons.map((button) => (
               <Button
                 onClick={() =>
                   setFill(
-                    inputUSDT
+                    inputType
                       ? Math.floor(
                           ((userDeposit.data ?? 0) * button.value) / 100
                         ).toString()
