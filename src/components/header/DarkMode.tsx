@@ -41,6 +41,10 @@ const DarkMode = () => {
       defaultSelected={themeLihgt}
       size="lg"
       color="warning"
+      classNames={{
+        wrapper: "bg-[#292a30]",
+        thumb: `light:bg-white dark:bg-[#7d8a88]`,
+      }}
       startContent={
         <svg
           aria-hidden="true"

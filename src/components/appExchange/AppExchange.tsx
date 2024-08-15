@@ -64,16 +64,16 @@ export default function AppExchange({ session }: Props) {
   }, [orders]);
 
   return (
-    <main className="flex flex-col items-center bg-gradient-to-b from-[#2EDEBE] to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden">
+    <main className="light flex flex-col items-center light:bg-gradient-to-b light:from-[#2EDEBE] light:to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden dark:from-[#101014] dark:to-[#101014]">
       <SwitchText />
       <div className=" flex gap-[8px] ">
         {/* Left menu */}
-        <div className="w-[350px] bg-white rounded-[5px] overflow-hidden">
+        <div className="w-[350px] bg-white rounded-[5px] overflow-hidden dark:border-[#7d8a88] dark:border-[1px]">
           <List />
         </div>
 
         {/* Center menu */}
-        <div className="w-[1205px]">
+        <div className="w-[1205px] dark:border-[#7d8a88] dark:border-[1px] rounded-[5px] overflow-hidden">
           <div className="h-[86px] bg-[#101014] rounded-[4px] w-[1205px] overflow-hidden">
             <Details />
           </div>

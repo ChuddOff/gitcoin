@@ -113,18 +113,22 @@ export default function RightMenu({ session }: Props) {
   });
 
   return (
-    <div className="pb-[13px] rounded-[5px] w-[340px] h-full bg-gradient-to-b from-[#93A1F8] to-[#42D2C9] flex flex-col items-center">
-      <div className="mt-[17px] relative flex flex-col items-center">
+    <div className="light pb-[13px] rounded-[5px] w-[340px] h-full light:bg-gradient-to-b light:from-[#93A1F8] light:to-[#42D2C9] flex flex-col items-center dark:from-[#141514] dark:to-[#141514] dark:border-[#7d8a88] dark:border-[1px]">
+      <div className="mt-[17px] relative flex flex-col items-center ">
         {!session && (
-          <div className=" absolute top-0 left-0 backdrop-blur-md z-30 w-full h-full rounded-[5px] flex items-center justify-center">
-            <h1 className=" text-black font-bold text-lg">Login to do trade</h1>
+          <div className=" absolute top-0 left-0 backdrop-blur-md z-30 w-full h-full rounded-[5px] flex items-center justify-center ">
+            <h1 className=" text-black font-bold text-lg dark:text-white">
+              Login to do trade
+            </h1>
           </div>
         )}
 
-        <div className="w-[323px] h-[47px] border-[1px] p-[11px] flex items-center justify-between rounded-[5px]">
-          <h3 className="font-[800] text-[13px] text-black">Доступ Баланс:</h3>
+        <div className="w-[323px] h-[47px] border-[1px] p-[11px] flex items-center justify-between rounded-[5px] dark:border-[#404854]">
+          <h3 className="font-[800] text-[13px] text-black dark:invert">
+            Доступ Баланс:
+          </h3>
           {userDeposit.isFetched ? (
-            <h3 className="font-[800] text-[13px] text-black">
+            <h3 className="font-[800] text-[13px] text-black dark:invert">
               {userDeposit.data}
             </h3>
           ) : (
@@ -221,11 +225,13 @@ export default function RightMenu({ session }: Props) {
           classNames={{
             base: "max-w-full max-w-[300px] w-full h-[40px] mt-[17px]",
             mainWrapper: "h-full ",
-            input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
+            input:
+              "text-[#b7b2b2] font-[800] text-[12px] bg-transparent dark:invert",
             innerWrapper: "flex",
-            label: "text-[#b7b2b2] font-[600] text-[12px]",
+            label:
+              "text-[#b7b2b2] font-[600] text-[12px] dark:text-white dark:invert",
             inputWrapper:
-              "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+              "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text dark:bg-[#25282c] dark:group-data-[focus=true]:bg-[#25282c] dark:text-white",
           }}
           endContent={
             <div className="h-full flex items-center justify-center w-[110px] ">
@@ -254,21 +260,23 @@ export default function RightMenu({ session }: Props) {
           }}
         />
         <Select
-          className="max-w-xs"
+          className="max-w-xs dark:text-white"
           disableSelectorIconRotation
           defaultSelectedKeys={["usdt"]}
           variant="underlined"
           size="sm"
           onChange={(e) => {
             setFill(0);
-            setInputUSDT(!inputUSDT);
+            setInputUSDT(e.target.value === "usdt");
           }}
           classNames={{
-            base: "flex justify-center items-center",
-            mainWrapper: "max-w-full max-w-[240px] w-full h-[30px] flex",
-            label: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent",
+            base: "flex justify-center items-center text-black dark:invert",
+            mainWrapper:
+              "max-w-full max-w-[240px] w-full h-[30px] flex text-black",
+            label:
+              "text-[#b7b2b2] font-[800] text-[12px] bg-transparent text-black dark:text-white",
             listbox:
-              "border-[black] data-[hover=true]:bg-[white] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text text-black",
+              "border-[black] data-[hover=true]:bg-black group-data-[focus=true]:bg-[#FFFFF0] !cursor-text text-black dark:text-white",
           }}
         >
           <SelectItem key="usdt">Заполнить по стоимости</SelectItem>
@@ -279,10 +287,11 @@ export default function RightMenu({ session }: Props) {
             classNames={{
               base: "max-w-full max-w-[300px] w-full h-[30px] ",
               mainWrapper: "h-full ",
-              input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
+              input:
+                "text-[#b7b2b2] font-[800] text-[12px] bg-transparent dark:text-white dark:invert",
               innerWrapper: "flex",
               inputWrapper:
-                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text dark:bg-[#25282c] dark:group-data-[focus=true]:bg-[#25282c] dark:text-white",
             }}
             endContent={
               <div className="h-full flex items-center justify-center w-[110px]">
@@ -303,10 +312,11 @@ export default function RightMenu({ session }: Props) {
             classNames={{
               base: "max-w-full max-w-[300px] w-full h-[30px] ",
               mainWrapper: "h-full ",
-              input: "text-[#b7b2b2] font-[800] text-[12px] bg-transparent ",
+              input:
+                "text-[#b7b2b2] font-[800] text-[12px] bg-transparent dark:text-white dark:invert",
               innerWrapper: "flex",
               inputWrapper:
-                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+                "rounded-[8px] h-full text-default-500 bg-[white] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text dark:bg-[#25282c] dark:group-data-[focus=true]:bg-[#25282c] dark:text-white",
             }}
             endContent={
               <div className="h-full flex items-center justify-center w-[110px]">
@@ -342,7 +352,7 @@ export default function RightMenu({ session }: Props) {
                 }
                 size="sm"
                 key={button.value}
-                className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px]"
+                className="text-[#d6d5d5] font-[800] text-[13px] w-[30px] bg-[#606060] border-r-[1px] border-black p-[0px] dark:bg-[#404854]"
               >
                 {button.value + "%"}
               </Button>

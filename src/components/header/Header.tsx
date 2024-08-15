@@ -22,11 +22,17 @@ const Header = ({ session }: Props) => {
   return (
     <Navbar
       isBordered={true}
-      className="light select-none light:bg-white dark:bg-gray-500"
+      className="light select-none light:bg-white dark:bg-[#141417]"
     >
       <NavbarBrand>
         <Link href="/">
-          <Image src="/logo.svg" alt="logo" width={44.23} height={41.49} />
+          <Image
+            src="/logo.svg"
+            alt="logo"
+            width={44.23}
+            height={41.49}
+            className="dark:invert"
+          />
         </Link>
         <NavbarItem className=" w-full flex justify-center items-center">
           <DarkMode />
@@ -47,7 +53,7 @@ const Header = ({ session }: Props) => {
               alt="exchange"
               width={32}
               height={32}
-              className="cursor-pointer h-[32px]"
+              className="cursor-pointer h-[32px] dark:invert"
             />
           </Link>
         </NavbarItem>
@@ -58,7 +64,7 @@ const Header = ({ session }: Props) => {
               alt="wallet"
               width={32}
               height={32}
-              className="cursor-pointer h-[32px]"
+              className="cursor-pointer h-[32px] dark:invert"
             />
           </Link>
         </NavbarItem>

@@ -2,7 +2,7 @@ import { Session } from "next-auth";
 import Image from "next/image";
 
 interface Props {
-    session: Session | null;
+  session: Session | null;
 }
 
 export default async function UserInfo({ session }: Props) {
@@ -15,7 +15,7 @@ export default async function UserInfo({ session }: Props) {
         height={32}
         className="cursor-pointer rounded-full"
       />
-      <div className=" text-black">
+      <div className=" text-black dark:invert">
         <p className=" text-sm font-medium">{session?.user.name}</p>
         <p className=" text-xs font-medium">{session?.user.email}</p>
       </div>

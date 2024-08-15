@@ -61,19 +61,23 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
   });
 
   return (
-    <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb]">
+    <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb] ">
       <Table
         aria-label="Example static collection table"
         radius="sm"
         isHeaderSticky={true}
         classNames={{
-          th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px]",
-          base: "p-[0px] m-[0px] h-[150px]",
-          table: "p-[0px] m-[0px] h-[5px] focus-within:outline-none",
-          tbody: "p-[0px] m-[0px] h-[5px]",
-          emptyWrapper: "p-[0px] m-[0px] h-[5px]",
-          wrapper: "p-[0px] m-[0px] h-full bg-white",
-          td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px]",
+          th: "py-[5px] px-[10px] m-[0px] h-[20px] bg-white text-[15px] dark:bg-[#101014] dark:text-white dark:shadow-none",
+          base: "p-[0px] m-[0px] h-[150px] dark:bg-[#101014] dark:border-[#8a8888] dark:text-white dark:shadow-none",
+          table:
+            "p-[0px] m-[0px] h-[5px] focus-within:outline-none dark:bg-[#101014] dark:border-[#8a8888] dark:text-white",
+          tbody:
+            "p-[0px] m-[0px] h-[5px] dark:bg-[#101014] dark:border-[#8a8888]",
+          emptyWrapper:
+            "p-[0px] m-[0px] h-[5px] dark:bg-[#101014] dark:border-[#8a8888]",
+          wrapper:
+            "p-[0px] m-[0px] h-full bg-white dark:bg-[#101014] dark:border-[#8a8888]",
+          td: "py-[1px] px-[10px] m-[0px] h-[10px] font-[500] text-[15px] dark:bg-[#101014] dark:border-[#8a8888] dark:shadow-none",
         }}
       >
         <TableHeader>
@@ -96,11 +100,10 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
                 {item.type === "buy" ? (
                   <Chip
                     size="lg"
-                    variant="shadow"
                     classNames={{
-                      base: "bg-[#6eed79] h-[25px] text-center ",
+                      base: "bg-[#6eed79] h-[25px] text-center dark:shadow-none",
                       content:
-                        "text-[#397730] text-[12px] font-bold w-[50px] text-center ",
+                        "text-[#397730] text-[12px] font-bold w-[50px] text-center dark:shadow-none",
                     }}
                   >
                     BUY
@@ -108,11 +111,10 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
                 ) : (
                   <Chip
                     size="lg"
-                    variant="shadow"
                     classNames={{
-                      base: "bg-[#ff6969] h-[25px] flex justify-center items-center text-center ",
+                      base: "bg-[#ff6969] h-[25px] flex justify-center items-center text-center dark:shadow-none",
                       content:
-                        "text-[#397730] text-[12px] font-bold w-[50px] text-center ",
+                        "text-[#397730] text-[12px] font-bold w-[50px] text-center dark:shadow-none",
                     }}
                   >
                     SELL
@@ -162,11 +164,14 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 text-black">
+              <ModalHeader className="flex flex-col gap-1 text-black dark:text-white">
                 Укажите TP и SL <br /> (Значение 0 - не установливать)
               </ModalHeader>
               <ModalBody>
                 <Input
+                  classNames={{
+                    base: "dark:text-white",
+                  }}
                   autoFocus
                   label="TP"
                   type="number"
@@ -180,6 +185,9 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
                   value={TP?.toString()}
                 />
                 <Input
+                  classNames={{
+                    base: "dark:text-white",
+                  }}
                   label="SL"
                   type="number"
                   variant="bordered"
@@ -196,7 +204,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
               <ModalFooter>
                 <Button
                   isLoading={updateOrder.isPending}
-                  color="primary"
+                  color="warning"
                   onPress={() => {
                     updateOrder.mutate({
                       id: currentOrder,

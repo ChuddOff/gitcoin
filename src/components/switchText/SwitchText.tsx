@@ -18,7 +18,7 @@ const SwitchText: React.FC = () => {
   }, []);
 
   return (
-    <div className="gap-[30px] flex w-[1910px] h-[58px] rounded-[5px] mt-[5px] mb-[5px] px-[22px] items-center bg-[#F0DDF3]">
+    <div className="gap-[30px] flex w-[1910px] h-[58px] rounded-[5px] mt-[5px] mb-[5px] px-[22px] items-center bg-[#F0DDF3] dark:bg-[#fddf91] dark:border-[#7d8a88] dark:border-[1px]">
       <Image src="/bell.svg" alt="bell" width={45} height={45} />
       <div className="h-[23px] overflow-hidden">
         <div

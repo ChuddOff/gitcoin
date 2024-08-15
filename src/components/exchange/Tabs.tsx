@@ -42,8 +42,8 @@ export default function BottomTabs({ orders }: Props) {
             title={`Текущие ордеры (${orders?.length ?? 0})`}
             className="p-[0px] h-full "
           >
-            <Card className="p-[0px] h-full rounded-[5px]">
-              <CardBody className="p-[0px] h-full">
+            <Card className="p-[0px] h-full rounded-[5px]  dark:border-[#7c8987] dark:border-[1px]">
+              <CardBody className="p-[0px] h-full ">
                 <YourOrders
                   cost={costs.data?.price || 0}
                   orderData={getAll.data || []}

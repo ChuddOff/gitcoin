@@ -59,33 +59,36 @@ export default function OrdersInfo() {
         variant="underlined"
         color="warning"
         classNames={{
-          panel: "bg-white",
-          tabList: "gap-3 w-full relative rounded-none p-[5px] px-[7px]",
+          base: "dark:text-white dark:bg-[#101014]",
+          panel: "bg-white dark:bg-[#101014] dark:text-white ",
+          tabList:
+            "gap-3 w-full relative rounded-none p-[5px] px-[7px] dark:bg-[#25282c] dark:text-white rounded-[5px] ",
           cursor: "w-full ",
-          tab: " px-0 w-[120px]",
+          tab: " px-0 w-[120px] dark:bg-[#25282c] dark:text-white ",
           tabContent:
-            "text-[#b4b6b9] font-[700] group-data-[selected=true]:text-black text-[13px]",
+            "light:text-[#b4b6b9] font-[700] group-data-[selected=true]:text-black text-[13px] dark:text-white ",
         }}
       >
         <Tab
           key="photos"
           title="Книга ордеров"
-          className=" h-full p-0 bg-white"
+          className=" h-full p-0 bg-white dark:text-white"
         >
-          <Card className="p-[0px] h-full rounded-[5px] bg-white">
-            <CardBody className="h-full bg-white border-[0px] p-[0px]">
+          <Card className="p-[0px] h-full rounded-[5px] dark:bg-[#101014] dark:text-white">
+            <CardBody className="h-full bg-white border-[0px] p-[0px] dark:bg-[#101014] mt-[6px] dark:text-white">
               <Table
                 aria-label="Example static collection table"
                 radius="sm"
                 layout="fixed"
                 classNames={{
-                  th: "w-full pt-[5px] px-[10px] m-[0px] h-[10px] bg-white text-[#81858c] font-[700]",
-                  base: "w-full p-[0px] m-[0px] h-[195px]",
-                  table: "w-full p-[0px] m-[0px] h-[5px]",
-                  tbody: "w-full p-[0px] m-[0px] h-[5px]",
-                  emptyWrapper: "w-full p-[0px] m-[0px] h-[5px]",
-                  wrapper: "w-full p-[0px] m-[0px] h-full",
-                  td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#ef484d] font-[500] text-[12px]",
+                  th: "w-full pt-[5px] px-[10px] m-[0px] h-[10px] bg-white text-[#81858c] font-[700] dark:bg-[#25282c]",
+                  base: "w-full p-[0px] m-[0px] h-[195px] dark:bg-[#101014]",
+                  table: "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#25282c]",
+                  tbody: "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#101014]",
+                  emptyWrapper:
+                    "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#101014]",
+                  wrapper: "w-full p-[0px] m-[0px] h-full dark:bg-[#25282c]",
+                  td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#ef484d] font-[500] text-[12px] dark:bg-[#25282c]",
                 }}
               >
                 <TableHeader>
@@ -131,7 +134,7 @@ export default function OrdersInfo() {
                 </TableBody>
               </Table>
               <div>
-                <h3 className="text-[#ef454a] font-[700] text-[15px] px-[10px] py-[4px]">
+                <h3 className="text-[#ef454a] font-[700] text-[15px] px-[10px] py-[1px]">
                   {response ? response?.asks[0][0] : ""}
                 </h3>
               </div>
@@ -141,13 +144,15 @@ export default function OrdersInfo() {
                 radius="sm"
                 layout="fixed"
                 classNames={{
-                  th: "w-full py-[5px] px-[10px] m-[0px] h-[10px] bg-white",
-                  base: "w-full p-[0px] m-[0px] h-[165px] ",
-                  table: "w-full p-[0px] m-[0px] h-[5px] ",
-                  tbody: "w-full p-[0px] m-[0px] h-[5px]",
-                  emptyWrapper: "w-full p-[0px] m-[0px] h-[5px]",
-                  wrapper: "w-full p-[0px] m-[0px] h-full bg-white",
-                  td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#45be84] font-[500] text-[12px]",
+                  th: "w-full py-[5px] px-[10px] m-[0px] h-[10px] bg-white dark:bg-[#25282c]",
+                  base: "w-full p-[0px] m-[0px] h-[165px] dark:bg-[#25282c] rounded-[10px]",
+                  table: "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#25282c]",
+                  tbody: "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#25282c]",
+                  emptyWrapper:
+                    "w-full p-[0px] m-[0px] h-[5px] dark:bg-[#25282c]",
+                  wrapper:
+                    "w-full p-[0px] m-[0px] h-full bg-white dark:bg-[#25282c]",
+                  td: "py-[1px] px-[10px] m-[0px] h-[10px] text-[#45be84] font-[500] text-[12px] dark:bg-[#25282c]",
                 }}
               >
                 <TableHeader>
@@ -181,12 +186,12 @@ export default function OrdersInfo() {
               </Table>
               <div className="flex h-[29px] gap-[6px] p-[0px] px-[10px] my-[9px] transition-all w-full">
                 <div
-                  className="rounded-[5px] flex bg-[#e7f5ee] transition-all  items-center gap-[5px] min-w-[70px]"
+                  className="rounded-[5px] flex bg-[#e7f5ee] transition-all  items-center gap-[5px] min-w-[70px] dark:bg-[#172b22]"
                   style={{
                     width: `calc(${response ? percent : 50}%)`,
                   }}
                 >
-                  <div className="transition-d transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84]">
+                  <div className="transition-d transition-all rounded-[5px] border-[2px] border-[#23b36e] flex w-[29px] justify-center items-center text-[#45be84] ">
                     B
                   </div>
                   <h3 className="text-[#45be84] font-[500] text-[15px]">
@@ -194,7 +199,7 @@ export default function OrdersInfo() {
                   </h3>
                 </div>
                 <div
-                  className="rounded-[5px] flex bg-[#ffeaea] justify-end min-w-[70px] items-center gap-[5px] "
+                  className="rounded-[5px] flex bg-[#ffeaea] justify-end min-w-[70px] items-center gap-[5px] dark:bg-[#34191e]"
                   style={{
                     width: `calc(${response ? 100 - percent : 50}%)`,
                   }}

@@ -28,11 +28,17 @@ const Search: React.FC = () => {
           input: "text-small bg-transparent ",
           innerWrapper: "flex",
           inputWrapper:
-            "rounded-[25px] h-full font-normal text-default-500 bg-[white] border-[1px] border-[black] data-[hover=true]:bg-[#F8F8FF] group-data-[focus=true]:bg-[#FFFFF0] !cursor-text",
+            "rounded-[25px] h-full font-normal text-default-500 bg-[white] border-[1px] border-[black] data-[hover=true]:bg-[#F8F8FF] light:group-data-[focus=true]:bg-[#FFFFF0] !cursor-text dark:bg-[#292a30] dark:border-[#8a8a88] dark:group-data-[focus=true]:bg-[#292a30]",
         }}
         endContent={
           <div className="h-full flex items-center">
-            <Image src="search.svg" alt="search" width={12} height={12} />
+            <Image
+              src="search.svg"
+              alt="search"
+              width={12}
+              height={12}
+              className="dark:invert"
+            />
           </div>
         }
         label="Search (BTC, ETH)"
