@@ -68,7 +68,7 @@ export default function AppExchange({ session }: Props) {
       <SwitchText />
       <div className=" flex gap-[8px] ">
         {/* Left menu */}
-        <div className="w-[350px] bg-white rounded-[5px] overflow-hidden dark:border-[#7d8a88] dark:border-[1px]">
+        <div className="w-[350px] bg-white rounded-[5px] overflow-hidden dark:border-[#7d8a88] dark:border-[1px] dark:bg-black">
           <List />
         </div>
 
@@ -78,7 +78,7 @@ export default function AppExchange({ session }: Props) {
             <Details />
           </div>
 
-          <div className="h-[500px] bg-white rounded-[5px] overflow-hidden">
+          <div className="h-[500px] bg-white rounded-[5px] overflow-hidden dark:bg-black">
             <Chart />
           </div>
 

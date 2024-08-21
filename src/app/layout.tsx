@@ -13,9 +13,8 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CodeSave",
-  description:
-    "охраните свои лучшие строки кода и поделитесь ими с другими разработчиками",
+  title: "CoinGit",
+  description: "Трейдинг только тут 👨‍💻",
 };
 
 export default function RootLayout({

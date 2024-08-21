@@ -114,6 +114,7 @@ export default function RightMenu({ session }: Props) {
 
   return (
     <div className="light pb-[13px] rounded-[5px] w-[340px] h-full light:bg-gradient-to-b light:from-[#93A1F8] light:to-[#42D2C9] flex flex-col items-center dark:from-[#141514] dark:to-[#141514] dark:border-[#7d8a88] dark:border-[1px]">
+      <title>Results page {typeCoin}</title>
       <div className="mt-[17px] relative flex flex-col items-center ">
         {!session && (
           <div className=" absolute top-0 left-0 backdrop-blur-md z-30 w-full h-full rounded-[5px] flex items-center justify-center ">

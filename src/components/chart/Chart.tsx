@@ -9,11 +9,14 @@ const Chart: React.FC = () => {
   const chart = useRef<HTMLDivElement>(null);
 
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    console.log(chart);
+    chart.current?.children[1] &&
+      chart.current!.removeChild(chart.current!.children[1]);
+    chart.current?.children[0] &&
+      chart.current!.removeChild(chart.current!.children[0]);
     const chartscript = document.createElement("script");
-    chartscript.style.display = theme === "light" ? "block" : "none";
     chartscript.src =
       "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     chartscript.type = "text/javascript";
@@ -24,7 +27,7 @@ const Chart: React.FC = () => {
           "symbol": "${tvwidgetsymbol || "BITSTAMP:BTCUSD"}",
           "interval": "S",
           "timezone": "Etc/UTC",
-          "theme": "light",
+          "theme": "${theme === "dark" ? "dark" : "light"}",
           "style": "1",
           "locale": "ru",
           "allow_symbol_change": true,
@@ -32,29 +35,8 @@ const Chart: React.FC = () => {
           "support_host": "https://www.tradingview.com"
         }`;
 
-    const chartscript2 = document.createElement("script");
-    chartscript2.style.display = theme === "dark" ? "block" : "none";
-    chartscript2.src =
-      "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-    chartscript2.type = "text/javascript";
-    chartscript2.async = true;
-    chartscript2.innerHTML = `
-        {
-          "autosize": true,
-          "symbol": "${tvwidgetsymbol || "BITSTAMP:BTCUSD"}",
-          "interval": "S",
-          "timezone": "Etc/UTC",
-          "theme": "dark",
-          "style": "1",
-          "locale": "ru",
-          "allow_symbol_change": true,
-          "calendar": true,
-          "support_host": "https://www.tradingview.com"
-        }`;
-
-    if (chart.current!.children.length === 1) {
+    if (chart.current!.childElementCount === 0) {
       chart.current!.appendChild(chartscript);
-      chart.current!.appendChild(chartscript2);
     }
   }, [chart, tvwidgetsymbol, theme]);
 
