@@ -17,7 +17,7 @@ const Details: React.FC = () => {
     detailsscript.innerHTML = `
         {
           "symbol": "${tvwidgetsymbol || "BITSTAMP:BTCUSD"}",
-          "width": 1205,
+          "width": "100%",
           "locale": "ru",
           "colorTheme": "dark",
           "isTransparent": false

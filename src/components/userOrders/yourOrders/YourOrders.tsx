@@ -61,7 +61,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
   });
 
   return (
-    <div className="w-full h-full overflow-x-hidden items-center bg-[#fffbfb] ">
+    <div className="w-full h-full overflow-x-hidden items-center ">
       <Table
         aria-label="Example static collection table"
         radius="sm"
@@ -164,7 +164,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 text-black dark:text-white">
+              <ModalHeader className="flex flex-col gap-1 text-blac">
                 Укажите TP и SL <br /> (Значение 0 - не установливать)
               </ModalHeader>
               <ModalBody>

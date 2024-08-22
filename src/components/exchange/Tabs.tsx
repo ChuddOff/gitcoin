@@ -23,7 +23,7 @@ export default function BottomTabs({ orders }: Props) {
   });
 
   return (
-    <div className="h-[190px] bg-[#101014] rounded-[5px]">
+    <div className="h-[190px] bg-[#101014] rounded-[5px] w-full">
       <div className="flex w-full flex-col h-full">
         <Tabs
           aria-label="Options"
@@ -53,7 +53,7 @@ export default function BottomTabs({ orders }: Props) {
             </Card>
           </Tab>
           <Tab key="music" title="История ордеров" className="p-[0px] h-full">
-            <Card className="p-[0px] h-full rounded-[5px]">
+            <Card className="p-[0px] h-full rounded-[5px] dark:border-[#7c8987] dark:border-[1px]">
               <CardBody className="p-[0px] h-full">
                 <OrdersHistory
                   cost={costs.data?.price || 0}
@@ -64,7 +64,7 @@ export default function BottomTabs({ orders }: Props) {
             </Card>
           </Tab>
           <Tab key="videos" title="История торговли" className="p-[0px] h-full">
-            <Card className="p-[0px] h-full rounded-[5px]">
+            <Card className="p-[0px] h-full rounded-[5px] dark:border-[#7c8987] dark:border-[1px]">
               <CardBody className="p-[0px] h-full">
                 <TradeHistory
                   cost={costs.data?.price || 0}

@@ -184,7 +184,9 @@ export default function RightMenu({ session }: Props) {
             isDisabled={
               Number(fill).toString() !== fill ||
               Number(fill) <= 0 ||
-              (userPocket![typeCoin] ?? 0) <= Number(fill) ||
+              (userPocket &&
+                userPocket[typeCoin] &&
+                userPocket[typeCoin] <= Number(fill)) ||
               price <= 0
             }
             color="danger"

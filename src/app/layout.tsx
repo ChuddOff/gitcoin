@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ scrollbarColor: "#7b7b7b #424242" }}>
       <body className={montserrat.className}>
         <TRPCReactProvider>
           <NextAuthProvider>
