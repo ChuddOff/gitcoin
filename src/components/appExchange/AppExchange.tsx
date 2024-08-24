@@ -63,6 +63,25 @@ export default function AppExchange({ session }: Props) {
     checkOrders();
   }, [orders]);
 
+  if (window && window.innerWidth < 1400) {
+    return (
+      <main className="w-[calc(100vw-8px)] light flex flex-col items-center light:bg-gradient-to-b light:from-[#2EDEBE] light:to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden dark:from-[#101014] dark:to-[#101014]">
+        <SwitchText />
+        <div className=" flex gap-[8px] flex-col w-[calc(100vw-16px)]">
+          <div className="h-[173px] bg-[#101014] rounded-[4px] w-full overflow-hidden">
+            <Details />
+          </div>
+
+          <div className="h-[500px] w-full bg-white rounded-[5px] overflow-hidden dark:bg-black">
+            <Chart />
+          </div>
+          <RightMenu session={session} />
+          <BottomTabs orders={ordersNotCompleted} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="light flex flex-col items-center light:bg-gradient-to-b light:from-[#2EDEBE] light:to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden dark:from-[#101014] dark:to-[#101014]">
       <SwitchText />
@@ -73,7 +92,7 @@ export default function AppExchange({ session }: Props) {
         </div>
 
         {/* Center menu */}
-        <div className="w-[calc(100vw-350px-340px-8px-8px-8px)] dark:border-[#7d8a88] dark:border-[1px] rounded-[5px] overflow-hidden">
+        <div className="w-[calc(100vw-350px-340px-8px-8px-16px)] dark:border-[#7d8a88] dark:border-[1px] rounded-[5px] overflow-hidden">
           <div className="h-[86px] bg-[#101014] rounded-[4px] w-full overflow-hidden">
             <Details />
           </div>

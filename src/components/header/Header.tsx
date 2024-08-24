@@ -34,7 +34,7 @@ const Header = ({ session }: Props) => {
             className="dark:invert"
           />
         </Link>
-        <NavbarItem className=" w-full flex justify-center items-center">
+        <NavbarItem className="flex justify-center items-center w-[64px] pl-[36px]">
           <DarkMode />
         </NavbarItem>
       </NavbarBrand>

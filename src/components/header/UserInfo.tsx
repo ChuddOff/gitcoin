@@ -1,3 +1,5 @@
+"use client";
+
 import { Session } from "next-auth";
 import Image from "next/image";
 
@@ -5,7 +7,7 @@ interface Props {
   session: Session | null;
 }
 
-export default async function UserInfo({ session }: Props) {
+export default function UserInfo({ session }: Props) {
   return (
     <div className=" flex items-center gap-2">
       <Image
@@ -15,10 +17,12 @@ export default async function UserInfo({ session }: Props) {
         height={32}
         className="cursor-pointer rounded-full"
       />
-      <div className=" text-black dark:invert">
-        <p className=" text-sm font-medium">{session?.user.name}</p>
-        <p className=" text-xs font-medium">{session?.user.email}</p>
-      </div>
+      {window && window.innerWidth > 1400 && (
+        <div className=" text-black dark:invert">
+          <p className=" text-sm font-medium">{session?.user.name}</p>
+          <p className=" text-xs font-medium">{session?.user.email}</p>
+        </div>
+      )}
     </div>
   );
 }

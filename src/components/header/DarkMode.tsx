@@ -42,6 +42,7 @@ const DarkMode = () => {
       size="lg"
       color="warning"
       classNames={{
+        base: "w-[240px] max-[700px]:w-[100px]",
         wrapper: "bg-[#292a30]",
         thumb: `light:bg-white dark:bg-[#7d8a88]`,
       }}

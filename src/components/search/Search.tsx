@@ -20,10 +20,10 @@ const Search: React.FC = () => {
   };
 
   return (
-    <div onKeyDown={onKeyPress} className="w-[430px]">
+    <div onKeyDown={onKeyPress} className="w-[360px] max-[700px]:hidden">
       <Input
         classNames={{
-          base: "max-w-full max-w-[430px] w-full h-[40px] ",
+          base: "w-full h-[40px] ",
           mainWrapper: "h-full ",
           input: "text-small bg-transparent ",
           innerWrapper: "flex",

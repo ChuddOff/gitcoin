@@ -164,7 +164,7 @@ const YourOrders = ({ cost, orderData, isPending }: YourOrdersInterface) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 text-blac">
+              <ModalHeader className="flex flex-col gap-1 text-black">
                 Укажите TP и SL <br /> (Значение 0 - не установливать)
               </ModalHeader>
               <ModalBody>

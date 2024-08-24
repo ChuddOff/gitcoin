@@ -23,7 +23,7 @@ export default function BottomTabs({ orders }: Props) {
   });
 
   return (
-    <div className="h-[190px] bg-[#101014] rounded-[5px] w-full">
+    <div className="h-[190px] bg-[#101014] rounded-[5px] w-full max-[1400px]:w-[calc(100vw-16px)]">
       <div className="flex w-full flex-col h-full">
         <Tabs
           aria-label="Options"
