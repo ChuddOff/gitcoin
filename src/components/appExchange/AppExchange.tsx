@@ -68,7 +68,7 @@ export default function AppExchange({ session }: Props) {
       <main className="w-[calc(100vw-8px)] light flex flex-col items-center light:bg-gradient-to-b light:from-[#2EDEBE] light:to-[#A098FF] h-[calc(100vh-65px)] overflow-hidden dark:from-[#101014] dark:to-[#101014]">
         <SwitchText />
         <div className=" flex gap-[8px] flex-col w-[calc(100vw-16px)]">
-          <div className="h-[173px] bg-[#101014] rounded-[4px] w-full overflow-hidden">
+          <div className="h-[143px] bg-[#101014] rounded-[4px] w-full overflow-hidden">
             <Details />
           </div>
 

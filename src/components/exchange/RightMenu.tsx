@@ -363,9 +363,11 @@ export default function RightMenu({ session }: Props) {
           </ButtonGroup>
         </div>
       </div>
-      <div className="bg-[#ffffff] rounded-[5px] mt-[11px] w-[320px] h-full p-[0px]">
-        <OrdersInfo />
-      </div>
+      {window && window.innerWidth > 800 && (
+        <div className="bg-[#ffffff] rounded-[5px] mt-[11px] w-[320px] h-full p-[0px]">
+          <OrdersInfo />
+        </div>
+      )}
     </div>
   );
 }
